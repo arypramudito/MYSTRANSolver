@@ -29,11 +29,10 @@
 ! Processes a single RSPLINE rigid element, per call, to get terms for the RMG constraint matrix
  
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_ERR, WRT_LOG, ERR, F04, F06, L1F, L1F_MSG, LINK1F, L1J
+      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, L1F, L1F_MSG, LINK1F, L1J
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, MRSPLINE, NCORD, NGRID, NTERM_RMG
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
-      USE SUBR_BEGEND_LEVELS, ONLY    :  RIGID_ELEM_PROC_BEGEND
       USE DOF_TABLES, ONLY            :  TDOF, TDOF_ROW_START
       USE MODEL_STUF, ONLY            :  CORD, GRID, RGRID, GRID_ID, CORD
       USE PARAMS, ONLY                :  EPSIL
@@ -78,7 +77,7 @@
       INTEGER(LONG)                   :: ROW_NUM           ! A row number in array TDOF
       INTEGER(LONG)                   :: ROW_NUM_START     ! DOF number where TDOF data begins for a grid
       INTEGER(LONG)                   :: TOTAL_NUM         ! Total number of records read for a single rigid element
-      INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = RIGID_ELEM_PROC_BEGEND + 1
+
  
       REAL(DOUBLE)                    :: DL_RAT            ! D/L ratio from the B.D. RSPLINE entry
 
@@ -112,12 +111,7 @@
       REAL(DOUBLE)                    :: V01D(3)           ! Vector in basic coords from AGRID_I1 to AGRID_D
       REAL(DOUBLE)                    :: ZETA              ! Nondimensional distance from AGRID_I1 to AGRID_D
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
 ! File LINK1F contains data from the logical RSPLINE cards in the input B.D. deck. For each logical RSPLINE card, LINK1F has:
@@ -135,23 +129,30 @@
 
       IF (DEBUG(111) > 0) CALL DEB_RSPLINE_PROC ( ' 1' )
 
+
+! Get the internal grid ID's for AGRID I1, AGRID_I2 and AGRID_D. We know they exist 
+
+      CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, AGRID_I1, GRID_ID_ROW_NUM_I1 )
+      CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, AGRID_I2, GRID_ID_ROW_NUM_I2 )
+      CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, AGRID_D , GRID_ID_ROW_NUM_D )
+
       REC_NO = REC_NO + 1
       IF (IOCHK == 0) THEN
-         CALL GET_GRID_NUM_COMPS ( AGRID_I1, NUM_COMPS_I1, SUBR_NAME )
+         CALL GET_GRID_NUM_COMPS ( GRID_ID_ROW_NUM_I1, NUM_COMPS_I1, SUBR_NAME )
          IF (NUM_COMPS_I1 /= 6) THEN
             IERR  = IERR + 1
             JERR = JERR + 1
             WRITE(ERR,1951) 'RSPLINE', REID, NUM_COMPS_I1
             WRITE(F06,1951) 'RSPLINE', REID, NUM_COMPS_I1
          ENDIF
-         CALL GET_GRID_NUM_COMPS ( AGRID_I2, NUM_COMPS_I2, SUBR_NAME )
+         CALL GET_GRID_NUM_COMPS ( GRID_ID_ROW_NUM_I2, NUM_COMPS_I2, SUBR_NAME )
          IF (NUM_COMPS_I2 /= 6) THEN
             IERR  = IERR + 1
             JERR = JERR + 1
             WRITE(ERR,1951) 'RSPLINE', REID, NUM_COMPS_I2
             WRITE(F06,1951) 'RSPLINE', REID, NUM_COMPS_I2
          ENDIF
-         CALL GET_GRID_NUM_COMPS ( AGRID_D, NUM_COMPS_D, SUBR_NAME )
+         CALL GET_GRID_NUM_COMPS ( GRID_ID_ROW_NUM_D, NUM_COMPS_D, SUBR_NAME )
          IF (NUM_COMPS_D /= 6) THEN
             IERR  = IERR + 1
             JERR = JERR + 1
@@ -159,7 +160,7 @@
             WRITE(F06,1951) 'RSPLINE', REID, NUM_COMPS_D
          ENDIF
       ELSE
-         CALL READERR ( IOCHK, LINK1F, L1F_MSG, REC_NO, OUNT, 'Y' )
+         CALL READERR ( IOCHK, LINK1F, L1F_MSG, REC_NO, OUNT )
          IERR = IERR + 1
          JERR = JERR + 1
       ENDIF
@@ -171,11 +172,6 @@
          RETURN
       ENDIF
 
-! Get the internal grid ID's for AGRID I1, AGRID_I2 and AGRID_D. We know they exist 
-
-      CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, AGRID_I1, GRID_ID_ROW_NUM_I1 )
-      CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, AGRID_I2, GRID_ID_ROW_NUM_I2 )
-      CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, AGRID_D , GRID_ID_ROW_NUM_D )
 
 ! Get the distances from AGRID_I1 to AGRID_I2 (total length of the RSPLINE) and AGRID_I1 to AGRID_D
 
@@ -357,12 +353,7 @@
 
       IF (DEBUG(111) > 0) CALL DEB_RSPLINE_PROC ( '99' )
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
+
 
       RETURN
 
@@ -413,10 +404,9 @@
 ! the line between the 2 RSPLINE indep grids)
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_LOG, ERR, F04, F06
+      USE IOUNT1, ONLY                :  ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR
       USE TIMDAT, ONLY                :  TSEC
-      USE SUBR_BEGEND_LEVELS, ONLY    :  RIGID_ELEM_PROC_BEGEND
       USE CONSTANTS_1, ONLY           :  ZERO
       USE PARAMS, ONLY                :  EPSIL
 
@@ -432,7 +422,7 @@
       INTEGER(LONG)                   :: I3_IN(3)          ! Integer array used in sorting VX. 
       INTEGER(LONG)                   :: I3_OUT(3)         ! Integer array in sort order of VX_SORT. If VX is sorted sp that
 !                                                             comp 2 is smallest then comp 3 then comp 1 then I3_OUT is 2, 3, 1 
-      INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = RIGID_ELEM_PROC_BEGEND + 1
+
 
       REAL(DOUBLE) , INTENT(IN)       :: V012(3)           ! Vector in basic coords from 1st to 2nd indep grids on the RSPLINE
 
@@ -446,12 +436,7 @@
       REAL(DOUBLE)                    :: VY(3)             ! A vector in the elem y dir
       REAL(DOUBLE)                    :: VZ(3)             ! A vector in the elem z dir
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
       EPS1 = EPSIL(1)
@@ -539,12 +524,7 @@
          TRSPLINE(3,I) = VZ(I)/MAGZ
       ENDDO 
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
+
 
       RETURN
 
@@ -569,18 +549,17 @@
 ! Calculate thespline functions for an RSPLINE element in element coords (x axis along the line between the 2 indep grids)
 
       USE PENTIUM_II_KIND
-      USE IOUNT1, ONLY                :  ERR, F04, F06
+      USE IOUNT1, ONLY                :  ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM
       USE CONSTANTS_1, ONLY           :  ONE, TWO, THREE, FOUR, SIX
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE SUBR_BEGEND_LEVELS, ONLY    :  RIGID_ELEM_PROC_BEGEND
 
       IMPLICIT NONE
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'RSPLINE_FUNCTIONS'
 
       INTEGER(LONG)                   :: I,J               ! DO loop indices
-      INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = RIGID_ELEM_PROC_BEGEND + 1
+
 
       REAL(DOUBLE) , INTENT(IN)       :: L12               ! Length of RSPLINE between the 2 independent grids
       REAL(DOUBLE) , INTENT(IN)       :: Z                 ! Nondim distance to the RSPLINE dependent grid from the 1st indep grid
@@ -597,12 +576,7 @@
       REAL(DOUBLE)                    :: Z_2               ! Z squared
       REAL(DOUBLE)                    :: Z_3               ! Z cubed
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
 ! Initialize
@@ -649,12 +623,7 @@
       FR24(2,2) = THREE*Z_2 - TWO*Z
       FR24(3,3) = FR24(2,2)
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
+
 
       RETURN
 

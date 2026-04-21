@@ -29,7 +29,7 @@
 ! Call routines to reduce stiffness, mass, loads and constraint matrices from G-set to N, M-sets
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  ERR, F04, F06, L1C, LINK1C, L1C_MSG, SC1, WRT_ERR, WRT_LOG
+      USE IOUNT1, ONLY                :  ERR, F06, L1C, LINK1C, L1C_MSG, SC1, WRT_ERR
 
       USE SCONTR, ONLY                :  LINKNO    , NDOFG, NDOFN, NDOFM, NGRID, NSUB,                                             &
                                          NTERM_KGG , NTERM_KNN , NTERM_KNM , NTERM_KMM ,                                           &
@@ -44,7 +44,6 @@
       USE DOF_TABLES, ONLY            :  TDOF, TDOFI
       USE MODEL_STUF, ONLY            :  GRID_ID
       USE RIGID_BODY_DISP_MATS, ONLY  :  RBGLOBAL_GSET, RBGLOBAL_NSET
-      USE SUBR_BEGEND_LEVELS, ONLY    :  REDUCE_G_NM_BEGEND
       USE SPARSE_MATRICES, ONLY       :  I_KGG , J_KGG , KGG , I_KGGD, J_KGGD, KGGD,                                               &
                                          I_KNN , J_KNN , KNN , I_KNM , J_KNM , KNM , I_KMM , J_KMM , KMM ,                         &
                                          I_KNND, J_KNND, KNND, I_KNMD, J_KNMD, KNMD, I_KMMD, J_KMMD, KMMD,                         &
@@ -83,7 +82,6 @@
       INTEGER(LONG)                   :: PART_VEC_SUB(NSUB)  ! Partitioning vector (1's for all subcases)
       INTEGER(LONG)                   :: SA_SET_COL          ! Col no. in array TDOF where the SA-set is (from subr TDOF_COL_NUM)
       INTEGER(LONG)                   :: TOT_NUM_ASPC        ! Sum of NUM_ASPC_BY_COMP(6)
-      INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = REDUCE_G_NM_BEGEND
 
       REAL(DOUBLE)                    :: KNN_DIAG(NDOFN)     ! Diagonal terms from KNN
       REAL(DOUBLE)                    :: KNN_MAX_DIAG        ! Max diag term from  KNN
@@ -92,12 +90,7 @@
 
       INTRINSIC                       :: DABS
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
 ! Determine if we need to keep any OUTPUT4 matrices allocated until after they are processed in LINK2
@@ -434,7 +427,7 @@
          WRITE(SC1,2092) MODNAM,HOUR,MINUTE,SEC,SFRAC
          K = 0
          DO I=1,NGRID
-            CALL GET_GRID_NUM_COMPS ( GRID_ID(I), NUM_COMPS, SUBR_NAME )
+            CALL GET_GRID_NUM_COMPS ( I, NUM_COMPS, SUBR_NAME )
             DO J=1,NUM_COMPS
                K = K + 1
                IF (TDOF(K,SA_SET_COL) /= 0) THEN
@@ -546,12 +539,7 @@
 
       ENDIF
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
+
 
       RETURN
 
@@ -574,8 +562,8 @@
 ! reruns subr TDOF_PROC and writes the new TSET, TDOF, TDOFI tables to file L1C
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE SCONTR, ONLY                :  DATA_NAM_LEN, NDOFG, NDOFSA, NGRID, NUM_PCHD_SPC1
-      USE IOUNT1, ONLY                :  WRT_ERR, WRT_LOG, ERR, F04, F06, L1C, L1C_MSG, LINK1C, SPC, SPCFIL
+      USE SCONTR, ONLY                :  DATA_NAM_LEN, FATAL_ERR, NDOFG, NDOFSA, NGRID, NUM_PCHD_SPC1
+      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, L1C, L1C_MSG, LINK1C, SPC, SPCFIL
       USE PARAMS, ONLY                :  AUTOSPC, AUTOSPC_INFO, AUTOSPC_NSET, PCHSPC1, PRTTSET, SPC1SID
       USE DOF_TABLES, ONLY            :  TDOF, TDOFI, TSET
       USE MODEL_STUF, ONLY            :  GRID, GRID_ID, GRID_SEQ
@@ -593,14 +581,13 @@
       INTEGER(LONG)                   :: GRID_ID_ROW_NUM    ! Row number in array GRID_ID where AGRID is found
       INTEGER(LONG)                   :: I,J                ! DO loop indices
       INTEGER(LONG)                   :: IOCHK              ! IOSTAT error number when opening/reading a file
-      INTEGER(LONG)                   :: JSTART             ! DO loop start point
       INTEGER(LONG)                   :: NUM_ASPC_BY_COMP(6)! Number of AUTOSPC's by component number
       INTEGER(LONG)                   :: NUM_N_SET_ROWS_NULL! Number of rows in KNN that are null and are not S or O-set members
       INTEGER(LONG)                   :: N_SET_COL          ! Col no. in array TDOF where the  N-set is (from subr TDOF_COL_NUM)
+      INTEGER(LONG), ALLOCATABLE      :: N_SET_TDOFI_ROW(:) ! Row in TDOFI for each N-set DOF number
       INTEGER(LONG)                   :: R_SET_COL          ! Col no. in array TDOF where the  R-set is (from subr TDOF_COL_NUM)
       INTEGER(LONG)                   :: S_SET_COL          ! Col no. in array TDOF where the  S-set is (from subr TDOF_COL_NUM)
       INTEGER(LONG)                   :: OUNT(2)            ! File units to write messages to. Input to subr UNFORMATTED_OPEN
-
 ! **********************************************************************************************************************************
       OUNT(1) = ERR
       OUNT(2) = F06
@@ -613,14 +600,29 @@
          OPEN (SPC, FILE=SPCFIL, STATUS='REPLACE', IOSTAT=IOCHK)
       ENDIF
       IF (IOCHK /= 0) THEN
-         CALL OPNERR ( IOCHK, SPCFIL, OUNT, 'Y' )
-         CALL FILERR ( OUNT, 'Y' )
+         CALL OPNERR ( IOCHK, SPCFIL, OUNT )
+         CALL FILERR ( OUNT )
          CALL OUTA_HERE ( 'Y' )
       ENDIF
 
       CALL TDOF_COL_NUM ( 'N ',  N_SET_COL )
       CALL TDOF_COL_NUM ( 'R ',  R_SET_COL )
       CALL TDOF_COL_NUM ( 'S ',  S_SET_COL )
+
+      IF (NDOFN > 0) THEN
+         ALLOCATE ( N_SET_TDOFI_ROW(NDOFN), STAT=IOCHK )
+         IF (IOCHK /= 0) THEN
+            WRITE(ERR,*) ' *ERROR: ALLOCATING N_SET_TDOFI_ROW IN ', SUBR_NAME
+            WRITE(F06,*) ' *ERROR: ALLOCATING N_SET_TDOFI_ROW IN ', SUBR_NAME
+            FATAL_ERR = FATAL_ERR + 1
+            CALL OUTA_HERE ( 'Y' )
+         ENDIF
+         N_SET_TDOFI_ROW = 0
+         DO J=1,NDOFG
+            N_SET_DOF = TDOFI(J,N_SET_COL)
+            IF (N_SET_DOF > 0) N_SET_TDOFI_ROW(N_SET_DOF) = J
+         ENDDO
+      ENDIF
 
       WRITE(ERR,101) AUTOSPC_NSET, PROG_NAME
       IF (SUPINFO == 'N') THEN
@@ -634,12 +636,12 @@
       ENDDO
 
       NUM_N_SET_ROWS_NULL = 0
-      JSTART = 1
 !xx   WRITE(SC1, * )                                       ! Advance 1 line for screen messages
       CALL COUNTER_INIT('       Proc N-set DOF ', NDOFN)
 i_do: DO I=1,NDOFN
          IF (I_KNN(I+1) == I_KNN(I)) THEN                  ! If true, row i is null
-j_do:       DO J=JSTART,NDOFG                              ! Loop over rows of TDOFI to find where this N-set row is null
+            J = N_SET_TDOFI_ROW(I)
+            IF (J > 0) THEN
                IF (TDOFI(J,N_SET_COL) == I) THEN
                   IF ((TDOFI(J,S_SET_COL) == 0) .AND. (TDOFI(J,R_SET_COL) == 0)) THEN
                      NUM_N_SET_ROWS_NULL = NUM_N_SET_ROWS_NULL + 1
@@ -659,11 +661,19 @@ j_do:       DO J=JSTART,NDOFG                              ! Loop over rows of T
                         WRITE(SPC,109) SPC1SID, COMP, AGRID
                         NUM_PCHD_SPC1 = NUM_PCHD_SPC1 + 1
                      ENDIF
-                     JSTART = J
-                     EXIT j_do
                   ENDIF
+               ELSE
+                  WRITE(ERR,*) ' *ERROR: N_SET_AUTOSPC_PROC_1 LOOKUP MISMATCH FOR N-SET DOF ', I
+                  WRITE(F06,*) ' *ERROR: N_SET_AUTOSPC_PROC_1 LOOKUP MISMATCH FOR N-SET DOF ', I
+                  FATAL_ERR = FATAL_ERR + 1
+                  CALL OUTA_HERE ( 'Y' )
                ENDIF
-            ENDDO j_do
+            ELSE
+               WRITE(ERR,*) ' *ERROR: N_SET_AUTOSPC_PROC_1 LOOKUP FAILED FOR N-SET DOF ', I
+               WRITE(F06,*) ' *ERROR: N_SET_AUTOSPC_PROC_1 LOOKUP FAILED FOR N-SET DOF ', I
+               FATAL_ERR = FATAL_ERR + 1
+               CALL OUTA_HERE ( 'Y' )
+            ENDIF
          ENDIF
          CALL COUNTER_PROGRESS(I)
       ENDDO i_do
@@ -672,9 +682,9 @@ j_do:       DO J=JSTART,NDOFG                              ! Loop over rows of T
 ! Close SPC file
 
       IF (NUM_PCHD_SPC1 > 0) THEN
-         CALL FILE_CLOSE ( SPC, SPCFIL,  'KEEP', 'Y' )
+         CALL FILE_CLOSE ( SPC, SPCFIL,  'KEEP' )
       ELSE
-         CALL FILE_CLOSE ( SPC, SPCFIL,  'DELETE', 'Y' )
+         CALL FILE_CLOSE ( SPC, SPCFIL,  'DELETE' )
       ENDIF
 
 ! IF we changed some DOF's from the N-set to the SA-set regenerate TDOF, TDOFI tables and write them to L1C
@@ -707,9 +717,9 @@ j_do:       DO J=JSTART,NDOFG                              ! Loop over rows of T
 
          OUNT(1) = ERR
          OUNT(2) = F06
-         CALL FILE_OPEN ( L1C, LINK1C, OUNT, 'REPLACE', L1C_MSG, 'WRITE_STIME', 'UNFORMATTED', 'WRITE', 'REWIND', 'Y', 'N', 'Y' )
+         CALL FILE_OPEN ( L1C, LINK1C, OUNT, 'REPLACE', L1C_MSG, 'WRITE_STIME', 'UNFORMATTED', 'WRITE', 'REWIND', 'Y', 'N' )
          CALL WRITE_DOF_TABLES
-         CALL FILE_CLOSE ( L1C, LINK1C, 'KEEP', 'Y' )
+         CALL FILE_CLOSE ( L1C, LINK1C, 'KEEP' )
 
       ELSE
 
@@ -719,7 +729,6 @@ j_do:       DO J=JSTART,NDOFG                              ! Loop over rows of T
          ENDIF
 
       ENDIF
-
 ! **********************************************************************************************************************************
    56 FORMAT(64X,'DEGREE OF FREEDOM SET TABLE (TSET)')
 
@@ -752,7 +761,7 @@ j_do:       DO J=JSTART,NDOFG                              ! Loop over rows of T
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE SCONTR, ONLY                :  DATA_NAM_LEN, NDOFN, NDOFG, NDOFSA, NGRID, NUM_PCHD_SPC1, PROG_NAME
-      USE IOUNT1, ONLY                :  WRT_ERR, WRT_LOG, ERR, F04, F06, L1C, L1C_MSG, LINK1C, SPC, SPCFIL
+      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, L1C, L1C_MSG, LINK1C, SPC, SPCFIL
       USE PARAMS, ONLY                :  AUTOSPC, AUTOSPC_INFO, AUTOSPC_NSET, AUTOSPC_RAT, PCHSPC1, PRTTSET, SPC1SID
       USE CONSTANTS_1, ONLY           :  ZERO
       USE DOF_TABLES, ONLY            :  TDOF, TDOFI, TSET
@@ -779,7 +788,6 @@ j_do:       DO J=JSTART,NDOFG                              ! Loop over rows of T
       INTEGER(LONG)                   :: R_SET_COL          ! Col no. in array TDOF where the  R-set is (from subr TDOF_COL_NUM)
       INTEGER(LONG)                   :: S_SET_COL          ! Col no. in array TDOF where the  S-set is (from subr TDOF_COL_NUM)
       INTEGER(LONG)                   :: OUNT(2)            ! File units to write messages to. Input to subr UNFORMATTED_OPEN
-
 ! **********************************************************************************************************************************
       OUNT(1) = ERR
       OUNT(2) = F06
@@ -792,8 +800,8 @@ j_do:       DO J=JSTART,NDOFG                              ! Loop over rows of T
          OPEN (SPC, FILE=SPCFIL, STATUS='REPLACE', IOSTAT=IOCHK)
       ENDIF
       IF (IOCHK /= 0) THEN
-         CALL OPNERR ( IOCHK, SPCFIL, OUNT, 'Y' )
-         CALL FILERR ( OUNT, 'Y' )
+         CALL OPNERR ( IOCHK, SPCFIL, OUNT )
+         CALL FILERR ( OUNT )
          CALL OUTA_HERE ( 'Y' )
       ENDIF
 
@@ -851,9 +859,9 @@ j_do:       DO J=JSTART,NDOFG                               ! Loop over rows of 
 ! Close SPC file
 
       IF (NUM_PCHD_SPC1 > 0) THEN
-         CALL FILE_CLOSE ( SPC, SPCFIL,  'KEEP', 'Y' )
+         CALL FILE_CLOSE ( SPC, SPCFIL,  'KEEP' )
       ELSE
-         CALL FILE_CLOSE ( SPC, SPCFIL,  'DELETE', 'Y' )
+         CALL FILE_CLOSE ( SPC, SPCFIL,  'DELETE' )
       ENDIF
 
 ! IF we changed some DOF's from the N-set to the SA-set regenerate TDOF, TDOFI tables and write them to L1C
@@ -886,11 +894,11 @@ j_do:       DO J=JSTART,NDOFG                               ! Loop over rows of 
 
          OUNT(1) = ERR
          OUNT(2) = F06
-         CALL FILE_OPEN ( L1C, LINK1C, OUNT, 'REPLACE', L1C_MSG, 'WRITE_STIME', 'UNFORMATTED', 'WRITE', 'REWIND', 'Y', 'N', 'Y' )
+         CALL FILE_OPEN ( L1C, LINK1C, OUNT, 'REPLACE', L1C_MSG, 'WRITE_STIME', 'UNFORMATTED', 'WRITE', 'REWIND', 'Y', 'N' )
 
          CALL WRITE_DOF_TABLES
 
-         CALL FILE_CLOSE ( L1C, LINK1C, 'KEEP', 'Y' )
+         CALL FILE_CLOSE ( L1C, LINK1C, 'KEEP' )
 
       ELSE
 
@@ -900,9 +908,8 @@ j_do:       DO J=JSTART,NDOFG                               ! Loop over rows of 
          ENDIF
 
       ENDIF
-
 ! **********************************************************************************************************************************
-   56 FORMAT(64X,'DEGREE OF FREEDOM SET TABLE (TSET)')
+  56 FORMAT(64X,'DEGREE OF FREEDOM SET TABLE (TSET)')
 
    57 FORMAT(33x,'     GRID SEQUENCE       T1       T2       T3       R1       R2       R3',/)
 

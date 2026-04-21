@@ -29,12 +29,11 @@
 ! Solves for eigenvalues and eigenvectors when method is GIV (Givens) or MGIV (modified Givens)
  
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_ERR, WRT_LOG, ERR, F04, F06
+      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, KLL_SDIA, KLLD_SDIA, MLL_SDIA, NDOFL, NTERM_KLL, NTERM_KLLD,     &
                                          NTERM_MLL, NUM_EIGENS, NUM_KLLD_DIAG_ZEROS, NUM_MLL_DIAG_ZEROS, NVEC, SOL_NAME, WARN_ERR
       USE TIMDAT, ONLY                :  TSEC
       USE PARAMS, ONLY                :  BAILOUT, EPSIL, SUPINFO, SUPWARN
-      USE SUBR_BEGEND_LEVELS, ONLY    :  EIG_GIV_MGIV_BEGEND
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, PI
       USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, EIGEN_VEC, MODE_NUM
       USE MODEL_STUF, ONLY            :  EIG_FRQ1, EIG_FRQ2, EIG_METH, EIG_N1, EIG_N2, EIG_VECS
@@ -44,14 +43,14 @@
       USE LAPACK_GIV_MGIV_EIG
  
       USE EIG_GIV_MGIV_USE_IFs
-
+      USE LINK_MESSAGE_Interface
+      
       IMPLICIT NONE
   
       CHARACTER, PARAMETER            :: CR13 = CHAR(13)   ! This causes a carriage return simulating the "+" action in a FORMAT
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'EIG_GIV_MGIV'
       CHARACTER( 1*BYTE)              :: JOBZ                ! 'V' or 'N' input to subr DSBGVX ( if 'V', calc vecs, 'N' do not).
       CHARACTER( 1*BYTE)              :: IFAIL_NULL          ! 'Y'/'N' indicator if array IFAIL has any nonzero values.
-      CHARACTER(44*BYTE)              :: MODNAM              ! Name to write to screen to describe module being run.
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: CALLED_SUBR = ' '   ! Name of a called subr (for output error purposes)
       CHARACTER( 8*BYTE)              :: NAME2       = ' '   ! Name for output purposes.
       CHARACTER( 1*BYTE)              :: RANGE               ! 'V' or 'I' indicator for LAPACK of whether eigen range is based on
@@ -84,7 +83,7 @@
       INTEGER(LONG)                   :: MLL_NULL_ROWS       ! Number of null rows in the MLL mass matrix.
       INTEGER(LONG)                   :: NUM_FAIL            ! Number of eigenvalues/vectors that failed to converge.
       INTEGER(LONG)                   :: NUM1                ! Number to use for max no. of eigens to find. Must be NUM1 <= NDOFL
-      INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = EIG_GIV_MGIV_BEGEND
+
 
       REAL(DOUBLE)                    :: ABSTOL              ! Tolerance number for LAPACK routines.
       REAL(DOUBLE)                    :: EPS1                ! Small number to compare variables against zero.
@@ -100,39 +99,29 @@
 
       INTRINSIC                       :: DSQRT, MIN
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
       EPS1   = EPSIL(1)
 
 ! Determine bandwidth of stiffness and mass matrices so BANDGEN can put them in LAPACK band form 
 
-      CALL OURTIM
-      MODNAM = 'CALCULATE BANDWIDTH OF KLL MATRIX'
-      WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+      CALL LINK_MESSAGE('CALCULATE BANDWIDTH OF KLL MATRIX')
       CALL BANDSIZ ( NDOFL, NTERM_KLL, I_KLL, J_KLL, KLL_SDIA ) 
       WRITE(ERR,4904) KLL_SDIA
       IF (SUPINFO == 'N') THEN
          WRITE(F06,4904) KLL_SDIA
       ENDIF
 
-      CALL OURTIM
       IF (SOL_NAME(1:8) == 'BUCKLING') THEN
-         MODNAM = 'CALCULATE BANDWIDTH OF KLLD MATRIX'
-         WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+         CALL LINK_MESSAGE('CALCULATE BANDWIDTH OF KLLD MATRIX')
          CALL BANDSIZ ( NDOFL, NTERM_KLLD, I_KLLD, J_KLLD, KLLD_SDIA ) 
          WRITE(ERR,4905) 'KLLD', KLLD_SDIA
          IF (SUPINFO == 'N') THEN
             WRITE(F06,4905) 'KLLD', KLLD_SDIA
          ENDIF
       ELSE
-         MODNAM = 'CALCULATE BANDWIDTH OF MLL MATRIX'
-         WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+         CALL LINK_MESSAGE('CALCULATE BANDWIDTH OF MLL MATRIX')
          CALL BANDSIZ ( NDOFL, NTERM_MLL, I_MLL, J_MLL, MLL_SDIA ) 
          WRITE(ERR,4905) 'MLL', MLL_SDIA
          IF (SUPINFO == 'N') THEN
@@ -195,41 +184,32 @@
 
 ! Allocate arrays ABAND and BBAND (stiffness, mass matrices in band form for LAPACK)
 
-      CALL OURTIM
-      MODNAM = 'ALLOCATE ARRAYS FOR LAPACK BAND FORM OF KLL'
-      WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+      CALL LINK_MESSAGE('ALLOCATE ARRAYS FOR LAPACK BAND FORM OF KLL')
       CALL ALLOCATE_LAPACK_MAT ( 'ABAND', LDAB, NDOFL, SUBR_NAME )
 
-      CALL OURTIM
       IF (SOL_NAME(1:8) == 'BUCKLING') THEN
-         MODNAM = 'ALLOCATE ARRAYS FOR LAPACK BAND FORM OF KLLD'
+         CALL LINK_MESSAGE('ALLOCATE ARRAYS FOR LAPACK BAND FORM OF KLLD')
       ELSE
-         MODNAM = 'ALLOCATE ARRAYS FOR LAPACK BAND FORM OF MLL'
+         CALL LINK_MESSAGE('ALLOCATE ARRAYS FOR LAPACK BAND FORM OF MLL')
       ENDIF
-      WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
       CALL ALLOCATE_LAPACK_MAT ( 'BBAND', LDBB, NDOFL, SUBR_NAME )
 
 ! Put stiffness and mass matrices in form required by LAPACK band matrix and write them out, if requested.
 
-      CALL OURTIM
-      MODNAM = 'PUT KLL MATRIX IN LAPACK BAND FORM'
-      WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+      CALL LINK_MESSAGE('PUT KLL MATRIX IN LAPACK BAND FORM')
       CALL BANDGEN_LAPACK_DPB ( 'KLL', NDOFL, A_SDIA, NTERM_KLL, I_KLL, J_KLL, KLL, ABAND, SUBR_NAME )
       IF ((DEBUG(40) == 1) .OR. (DEBUG(40) == 3)) THEN
          CALL WRITE_MATRIX_BY_ROWS ( 'STIFFNESS MATRIX KLL IN LAPACK BAND FORM', ABAND, LDAB, NDOFL, F06 )
       ENDIF
 
-      CALL OURTIM
       IF (SOL_NAME(1:8) == 'BUCKLING') THEN
-         MODNAM = 'PUT KLLD MATRIX IN LAPACK BAND FORM'
-         WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+         CALL LINK_MESSAGE('PUT KLLD MATRIX IN LAPACK BAND FORM')
          CALL BANDGEN_LAPACK_DPB ( 'KLLD', NDOFL, B_SDIA, NTERM_KLLD, I_KLLD, J_KLLD, KLLD, BBAND, SUBR_NAME )
          IF ((DEBUG(40) == 2) .OR. (DEBUG(40) == 3)) THEN
             CALL WRITE_MATRIX_BY_ROWS ( 'DIFF STIFF MATRIX KLLD IN LAPACK BAND FORM'     , BBAND, LDBB, NDOFL, F06 )
          ENDIF
       ELSE
-         MODNAM = 'PUT MLL MATRIX IN LAPACK BAND FORM'
-         WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+         CALL LINK_MESSAGE('PUT MLL MATRIX IN LAPACK BAND FORM')
          CALL BANDGEN_LAPACK_DPB ( 'MLL', NDOFL, B_SDIA, NTERM_MLL, I_MLL, J_MLL, MLL, BBAND, SUBR_NAME )
          IF ((DEBUG(40) == 2) .OR. (DEBUG(40) == 3)) THEN
             CALL WRITE_MATRIX_BY_ROWS ( 'MASS MATRIX MLL IN LAPACK BAND FORM'     , BBAND, LDBB, NDOFL, F06 )
@@ -239,9 +219,7 @@
 ! If this is not a CB or BUCKLING soln, dellocate arrays for KLL.      ! Keep arrays MLL, KLLD. Need them later to calc gen mass
 
       IF ((SOL_NAME(1:12) /= 'GEN CB MODEL' ) .AND. (SOL_NAME(1:8) /= 'BUCKLING')) THEN
-         CALL OURTIM
-         MODNAM = 'DEALLOCATE SPARSE KLL ARRAYS'
-         WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+         CALL LINK_MESSAGE('DEALLOCATE SPARSE KLL ARRAYS')
    !xx   WRITE(SC1, * )                                    ! Advance 1 line for screen messages         
          WRITE(SC1,12345,ADVANCE='NO') '       Deallocate KLL', CR13
          CALL DEALLOCATE_SPARSE_MAT ( 'KLL' )
@@ -316,9 +294,7 @@
 
       IF (EIG_METH(1:3) == 'GIV') THEN
 
-         CALL OURTIM
-         MODNAM = 'SOLVE FOR EIGENVALUES/VECTORS - GIV METHOD'
-         WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+         CALL LINK_MESSAGE('SOLVE FOR EIGENVALUES/VECTORS - GIV METHOD')
          IF (SOL_NAME(1:8) == 'BUCKLING') THEN
             CALL DSBGVX_GIV_MGIV ( JOBZ, RANGE, 'U', NDOFL, A_SDIA, B_SDIA, ABAND, LDAB, -BBAND, LDBB, Q, LDQ, VL, VU, IL, IU,     &
                                    ABSTOL, NUM_EIGENS, EIGEN_VAL, EIGEN_VEC, LDZ, WORK, IWORK, IFAIL, INFO, EIG_METH, MODE_NUM,    &
@@ -347,9 +323,7 @@
             ENDDO 
          ENDIF
 
-         CALL OURTIM
-         MODNAM = 'SOLVE FOR EIGENVALUES/VECTORS - MGIV METHOD'
-         WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+         CALL LINK_MESSAGE('SOLVE FOR EIGENVALUES/VECTORS - MGIV METHOD')
          IF (SOL_NAME(1:8) == 'BUCKLING') THEN
             CALL DSBGVX_GIV_MGIV ( JOBZ, RANGE, 'U', NDOFL, B_SDIA, A_SDIA, -BBAND, LDBB, ABAND, LDAB, Q, LDQ, VL, VU, IL, IU,     &
                                    ABSTOL, NUM_EIGENS, EIGEN_VAL, EIGEN_VEC, LDZ, WORK, IWORK, IFAIL, INFO, EIG_METH, MODE_NUM,    &
@@ -435,12 +409,7 @@
 
       ENDIF
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
+
 
       RETURN
 
@@ -459,8 +428,6 @@
 40051 FORMAT('               THEIR INDICES ARE:')
 
 40052 FORMAT(15X,10I8)
-
- 4092 FORMAT(1X,I2,'/',A44,18X,2X,I2,':',I2,':',I2,'.',I3)
 
  4904 FORMAT(' *INFORMATION: NUMBER OF SUPERDIAGONALS IN THE KLL STIFFNESS MATRIX UPPER TRIANGLE IS = ',I12,/)
 

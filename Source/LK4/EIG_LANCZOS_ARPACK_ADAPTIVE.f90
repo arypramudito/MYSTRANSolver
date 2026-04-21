@@ -40,15 +40,14 @@
 ! NOTE: This routine only supports normal modes (not BUCKLING or GEN CB MODEL)
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_ERR, WRT_LOG, ERR, F04, F06, SC1
+      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, SC1
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, KMSM_SDIA, LINKNO, NDOFL, NTERM_KLL, NTERM_KMSM,                 &
                                          NTERM_KMSMn, NTERM_MLL, NUM_EIGENS, NUM_MLL_DIAG_ZEROS, NVEC, SOL_NAME, WARN_ERR
-      USE TIMDAT, ONLY                :  HOUR, MINUTE, SEC, SFRAC, TSEC
+      USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, PI
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE PARAMS, ONLY                :  ARP_TOL, BAILOUT, EPSIL, MXITERL, SOLLIB, SPARSTOR, SUPINFO, SUPWARN
       USE DOF_TABLES, ONLY            :  TDOFI
-      USE SUBR_BEGEND_LEVELS, ONLY    :  EIG_LANCZOS_ARPACK_BEGEND
       USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, EIGEN_VEC, MODE_NUM
       USE MODEL_STUF, ONLY            :  EIG_FRQ1, EIG_FRQ2, EIG_LAP_MAT_TYPE, EIG_N2, EIG_NCVFACL
       USE ARPACK_MATRICES_1, ONLY     :  IWORK, RESID, RFAC, SELECT, VBAS, WORKD, WORKL
@@ -63,7 +62,8 @@
       USE EIG_LANCZOS_ARPACK_ADAPTIVE_USE_IFs
       USE DSBAND_PREFAC_Interface
       USE SYM_MAT_DECOMP_SUPRLU_Interface
-
+      USE LINK_MESSAGE_Interface
+      
       IMPLICIT NONE
 
       LOGICAL                         :: RVEC              ! Specifies whether eigenvectors are to be calculated
@@ -77,7 +77,6 @@
       CHARACTER( 1*BYTE)              :: BMAT              ! 'G' for generalized eigenvalue problem
       CHARACTER( 1*BYTE)              :: HOWMNY            ! 'A' to compute all eigenvectors
       CHARACTER( 2*BYTE)              :: WHICH             ! 'LM' for largest magnitude (closest to sigma in shift-invert)
-      CHARACTER(44*BYTE)              :: MODNAM            ! Module name for screen output
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: CALLED_SUBR = ' ' ! Name of called subr for error messages
 
       INTEGER(LONG)                   :: COMPV             ! Component number (1-6) of a grid DOF
@@ -102,7 +101,7 @@
       INTEGER(LONG)                   :: MAX_DOUBLINGS     ! Maximum number of doublings allowed
       INTEGER(LONG)                   :: INITIAL_NEV       ! Starting value for NEV
       INTEGER(LONG)                   :: MAX_NEV           ! Maximum NEV based on problem size and EIG_N2
-      INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = EIG_LANCZOS_ARPACK_BEGEND
+
 
       REAL(DOUBLE)                    :: EPS1              ! Small number for comparisons
       REAL(DOUBLE)                    :: SIGMA             ! Shift value (center of frequency range in omega^2)
@@ -127,12 +126,7 @@
 
       INTRINSIC                       :: MIN, MAX, SQRT, ABS
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME, TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
 ! NOTE: This routine should only be called when:
@@ -212,9 +206,7 @@
 ! **********************************************************************************************************************************
 ! Build KMSM = KLL - SIGMA*MLL (this is done ONCE since sigma is fixed)
 
-      CALL OURTIM
-      MODNAM = 'BUILD SHIFTED MATRIX [KLL - sigma*MLL]'
-      WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+      CALL LINK_MESSAGE('BUILD SHIFTED MATRIX [KLL - sigma*MLL]')
 
       CALL MATADD_SSS_NTERM ( NDOFL, 'KLL', NTERM_KLL, I_KLL, J_KLL, SYM_KLL, '-sigma*MLL',                                        &
                                             NTERM_MLL, I_MLL, J_MLL, SYM_MLL, 'KMSM', NTERM_KMSM )
@@ -224,9 +216,7 @@
                                'KMSM', NTERM_KMSM, I_KMSM, J_KMSM, KMSM )
 
 ! Calculate bandwidth of KMSM
-      CALL OURTIM
-      MODNAM = 'CALCULATE BANDWIDTH OF [KLL - sigma*MLL]'
-      WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+      CALL LINK_MESSAGE('CALCULATE BANDWIDTH OF [KLL - sigma*MLL]')
       CALL BANDSIZ ( NDOFL, NTERM_KMSM, I_KMSM, J_KMSM, KMSM_SDIA )
       WRITE(ERR,4905) KMSM_SDIA
       IF (SUPINFO == 'N') THEN
@@ -283,9 +273,7 @@
       KL = KMSM_SDIA
       KU = KL
 
-      CALL OURTIM
-      MODNAM = 'FACTOR SHIFTED MATRIX [KLL - sigma*MLL]'
-      WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+      CALL LINK_MESSAGE('FACTOR SHIFTED MATRIX [KLL - sigma*MLL]')
 
       ! Allocate RFAC and IWORK (kept across all iterations)
       CALL ALLOCATE_LAPACK_MAT ( 'RFAC', LDRFAC, NDOFL, SUBR_NAME )
@@ -435,9 +423,7 @@
          ENDDO
 
          ! Call DSBAND_PREFAC to compute eigenvalues (uses pre-factored RFAC/SLU_FACTORS)
-         CALL OURTIM
-         MODNAM = 'SOLVE FOR EIGENVALS/VECTORS - LANCZOS METH'
-         WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+         CALL LINK_MESSAGE('SOLVE FOR EIGENVALS/VECTORS - LANCZOS METH')
 
          INFO_ARPACK = 0
          INFO_LAPACK = 0
@@ -715,12 +701,6 @@
 
       WRITE(SC1,1014) NUM_EIGENS
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME, TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
 
       RETURN
 
@@ -831,8 +811,6 @@
 
  4003 FORMAT(' *ERROR  4003: PROGRAMMING ERROR IN SUBROUTINE ',A,                                                                  &
                     /,14X,' EIG_LAP_MAT_TYPE MUST BE EITHER "DGB" OR "DPB" BUT IS = ',A)
-
- 4092 FORMAT(1X,I2,'/',A44,18X,2X,I2,':',I2,':',I2,'.',I3)
 
  4905 FORMAT(' *INFORMATION: NUMBER OF SUPERDIAGONALS IN THE KMSM = [KLL - sigma*MLL] MATRIX UPPER TRIANGLE IS      = ',I12,/)
 

@@ -30,11 +30,10 @@
 ! each row to be in G-set DOF numerical order.
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  ERR, F04, F06, SC1, SPCFIL, SPC, WRT_ERR, WRT_LOG
+      USE IOUNT1, ONLY                :  ERR, F06, SC1, SPCFIL, SPC, WRT_ERR
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, NDOFG, NGRID, NIND_GRDS_MPCS,                                    &
                                          NTERM_KGGD, NUM_PCHD_SPC1, SOL_NAME, WARN_ERR
       USE TIMDAT, ONLY                :  TSEC
-      USE SUBR_BEGEND_LEVELS, ONLY    :  SPARSE_KGGD_BEGEND
       USE CONSTANTS_1, ONLY           :  ZERO
       USE PARAMS, ONLY                :  AUTOSPC, AUTOSPC_RAT, EPSIL, PRTSTIFF, SPC1QUIT, SUPINFO, SUPWARN
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
@@ -64,7 +63,7 @@
       INTEGER(LONG)                   :: NZERO   = 0        ! Count on zero terms in array STF
       INTEGER(LONG)                   :: ROW_NUM_START      ! DOF number where TDOF data begins for a grid
       INTEGER(LONG)                   :: RJ(NDOFG)          ! Column numbers corresponding to the terms in RSTF(I).
-      INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = SPARSE_KGGD_BEGEND
+
  
       REAL(DOUBLE)                    :: EPS1               ! A small number to compare real zero
       REAL(DOUBLE)                    :: KGGD_II(6,6)       ! 6 x 6 diagonal stiffness matrices for 1 grid
@@ -74,12 +73,7 @@
 
       INTRINSIC                       :: DABS
  
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
       EPS1 = EPSIL(1)
@@ -156,7 +150,7 @@ i_do: DO I = 1,NGRID
          CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, GRID_ID(INV_GRID_SEQ(I)), IGRID )
          ROW_NUM_START = TDOF_ROW_START(IGRID)
          KGGD_COL_NUM = TDOF(ROW_NUM_START,G_SET_COL)
-         CALL GET_GRID_NUM_COMPS ( GRID_ID(INV_GRID_SEQ(I)), NUM_COMPS, SUBR_NAME )
+         CALL GET_GRID_NUM_COMPS ( INV_GRID_SEQ(I), NUM_COMPS, SUBR_NAME )
 k_do:    DO K=1,NUM_COMPS
 
             KGGD_ROW_NUM = KGGD_ROW_NUM + 1
@@ -232,12 +226,7 @@ j_do3:      DO J=1,NUM_NONZERO_IN_ROW
          WRITE(F06,101) NUM_MAX
       ENDIF
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
+
 
       RETURN
 

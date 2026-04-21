@@ -29,13 +29,12 @@
 ! Writes blocks of elem nodal force output for one elem type, one subcase. All elements can have node force output
  
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_ERR, WRT_LOG, ANS, ERR, F04, F06
+      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, INT_SC_NUM, NDOFR, NUM_CB_DOFS, MOGEL, NVEC, SOL_NAME
-      USE PARAMS, ONLY                :  ELFORCEN, PRTANS
+      USE PARAMS, ONLY                :  ELFORCEN
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE SUBR_BEGEND_LEVELS, ONLY    :  WRITE_ELEM_NODE_FORCE_BEGEND
       USE LINK9_STUFF, ONLY           :  GID_OUT_ARRAY, EID_OUT_ARRAY, MAXREQ, OGEL
       USE MODEL_STUF, ONLY            :  ELEM_ONAME, LABEL, SCNUM, STITLE, TITLE
       USE MACHINE_PARAMS, ONLY        :  MACH_LARGE_NUM  
@@ -61,18 +60,13 @@
       INTEGER(LONG)                   :: BDY_DOF_NUM       ! DOF number for BDY_GRID/BDY_COMP
       INTEGER(LONG)                   :: I,J,K,M           ! DO loop indices
       INTEGER(LONG)                   :: L                 ! Counter
-      INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = WRITE_ELEM_NODE_FORCE_BEGEND
+
   
       REAL(DOUBLE)                    :: ABS_ANS(6)        ! Max Abs for all grids output for each of the 6 disp components
       REAL(DOUBLE)                    :: MAX_ANS(6)        ! Max for all grids output for each of the 6 disp components
       REAL(DOUBLE)                    :: MIN_ANS(6)        ! Min for all grids output for each of the 6 disp components
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
 ! Get element output name
@@ -145,52 +139,6 @@
 
          WRITE(F06,212) ONAME
          WRITE(F06,213)
-
-         IF (PRTANS == 'Y') THEN
-            WRITE(ANS,*)
-            WRITE(ANS,*)
-            IF    ((SOL_NAME(1:7) == 'STATICS') .OR. (SOL_NAME(1:8) == 'NLSTATIC')) THEN
-
-               WRITE(ANS,9101) SCNUM(JSUB)
-
-            ELSE IF (SOL_NAME(1:5) == 'MODES') THEN
-
-               WRITE(ANS,9102) JSUB
-
-            ELSE IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN   ! Write info on what CB DOF the output is for
-
-               IF ((JSUB <= NDOFR) .OR. (JSUB >= NDOFR+NVEC)) THEN 
-                  IF (JSUB <= NDOFR) THEN
-                     BDY_DOF_NUM = JSUB
-                  ELSE
-                     BDY_DOF_NUM = JSUB-(NDOFR+NVEC)
-                  ENDIF
-                  CALL GET_GRID_AND_COMP ( 'R ', BDY_DOF_NUM, BDY_GRID, BDY_COMP  )
-               ENDIF
-
-               IF       (JSUB <= NDOFR) THEN
-                  WRITE(ANS,9103) JSUB, NUM_CB_DOFS, 'acceleration', BDY_GRID, BDY_COMP
-               ELSE IF ((JSUB > NDOFR) .AND. (JSUB <= NDOFR+NVEC)) THEN
-                  WRITE(ANS,9105) JSUB, NUM_CB_DOFS, JSUB-NDOFR
-               ELSE
-                  WRITE(ANS,9103) JSUB, NUM_CB_DOFS, 'displacement', BDY_GRID, BDY_COMP
-               ENDIF
-
-            ENDIF
-
-            WRITE(ANS,*)
-
-            IF      (ELFORCEN == 'LOCAL') THEN
-               FORCE_COORD_SYS = 'L O C A L'
-            ELSE IF (ELFORCEN == 'GLOBAL') THEN
-               FORCE_COORD_SYS = 'G L O B A L'
-            ELSE IF (ELFORCEN == 'BASIC' ) THEN
-               FORCE_COORD_SYS = 'B A S I C  '
-            ENDIF
-            WRITE(ANS,201) FORCE_COORD_SYS
-            WRITE(ANS,212) ONAME
-            WRITE(ANS,213)
-         ENDIF
 
       ENDIF
  
@@ -267,22 +215,13 @@
 
             IF (J == 1) THEN
                WRITE(F06,221) EID_OUT_ARRAY(I,1),GID_OUT_ARRAY(I,J),(OGEL_CHAR(K),K=1,6)
-               IF (PRTANS == 'Y') THEN
-                  WRITE(ANS,291) EID_OUT_ARRAY(I,1),GID_OUT_ARRAY(I,J),(OGEL(L,K),K=1,6)
-               ENDIF
             ELSE
                WRITE(F06,222) GID_OUT_ARRAY(I,J),(OGEL_CHAR(K),K=1,6)        
-               IF (PRTANS == 'Y') THEN
-                  WRITE(ANS,292) GID_OUT_ARRAY(I,J),(OGEL(L,K),K=1,6)        
-               ENDIF
             ENDIF
 
          ENDDO
  
          WRITE(F06,*)
-         IF (PRTANS == 'Y') THEN
-            WRITE(ANS,*)
-         ENDIF
 
       ENDDO 
   
@@ -291,16 +230,8 @@
       ENDDO
 
       WRITE(F06,9111) (MAX_ANS_CHAR(J),J=1,6),(MIN_ANS_CHAR(J),J=1,6),(ABS_ANS_CHAR(J),J=1,6)
-      IF (PRTANS == 'Y') THEN
-         WRITE(ANS,9191) (MAX_ANS(J),J=1,6),(MIN_ANS(J),J=1,6),(ABS_ANS (J),J=1,6)
-      ENDIF
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
+
 
       RETURN
 
@@ -318,10 +249,6 @@
 
   222 FORMAT(16X,I8,6A)
 
-  291 FORMAT(6X,2(1X,I8),6(1ES14.6))
-
-  292 FORMAT(16X,I8,6(1ES14.6))
-
  9101 FORMAT(' OUTPUT FOR SUBCASE ',I8)
 
  9102 FORMAT(' OUTPUT FOR EIGENVECTOR ',I8)
@@ -338,12 +265,6 @@
              16X,'ABS* :  ',6A,/                                                                                                   &
              16X,'* for output set')
 
- 9191 FORMAT(12X,'             ------------- ------------- ------------- ------------- ------------- -------------',/,&
-             1X,'MAX (for output set):  ',6(1ES14.6),/,                                                                            &
-             1X,'MIN (for output set):  ',6(1ES14.6),//,                                                                           &
-             1X,'ABS (for output set):  ',6(1ES14.6))
-
- 8001 FORMAT(A1)
   
 ! **********************************************************************************************************************************
  

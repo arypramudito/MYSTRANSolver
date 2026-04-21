@@ -31,11 +31,10 @@
       ! should be zero
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, SHORT, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  ANS, ERR, F04, F06, OP2, SC1, WRT_ERR, WRT_LOG
+      USE IOUNT1, ONLY                :  ERR, F06, OP2, SC1, WRT_ERR
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, GROUT_GPFO_BIT, IBIT, INT_SC_NUM, JTSUB, NDOFG, NDOFM, MELDOF, NDOFO, NDOFR,&
                                          NELE, NGRID, NUM_CB_DOFS, NVEC, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
-      USE SUBR_BEGEND_LEVELS, ONLY    :  GP_FORCE_BALANCE_PROC_BEGEND
       USE CONSTANTS_1, ONLY           :  ZERO, ONE_HUNDRED
       USE DOF_TABLES, ONLY            :  TDOF, TDOF_ROW_START
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
@@ -43,7 +42,7 @@
                                          GROUT, LABEL, PLY_NUM, PEG, PTE, SCNUM, STITLE, SUBLOD, TITLE, TYPE
       USE LINK9_STUFF, ONLY           :  GID_OUT_ARRAY
       USE COL_VECS, ONLY              :  FG_COL, PG_COL, QGm_COL, QGs_COL, QGr_COL, UG_COL
-      USE PARAMS, ONLY                :  EPSIL, PRTANS
+      USE PARAMS, ONLY                :  EPSIL
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  GPFO_OUT
 
       USE GP_FORCE_BALANCE_PROC_USE_IFs
@@ -76,7 +75,7 @@
       INTEGER(LONG)                   :: NUM_CONN_ELEMS    ! The number of elements that are connected to a specific grid
       INTEGER(LONG)                   :: ROW_NUM_START     ! DOF number where TDOF data begins for a grid
       INTEGER(LONG)                   :: TDOF_ROW          ! Row no. in array TDOF to find GDOF DOF number
-      INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = GP_FORCE_BALANCE_PROC_BEGEND
+
 
       INTEGER(SHORT), DIMENSION(1)    :: Udd = (/0220/)    ! 0220 is the 4 digit ASCII code for a capital U double-dot
 
@@ -100,7 +99,7 @@
 
       INTEGER(LONG)                   :: NROWS, NCOLS, NNODE_GPFORCE, INODE_GPFORCE, IERR  ! GPFORCE table helper
 
-      LOGICAL                         :: WRITE_F06, WRITE_OP2, WRITE_ANS, IS_GPFORCE_SUMMARY_INFO  ! flags
+      LOGICAL                         :: WRITE_F06, WRITE_OP2, IS_GPFORCE_SUMMARY_INFO  ! flags
       LOGICAL                         :: IS_MODES, IS_THERMAL, IS_APP, IS_SPC, IS_MPC
 
       INTEGER(LONG)                   :: ISUBCASE_INDEX         ! helper to get the title/subcase
@@ -124,31 +123,17 @@
       CHARACTER*8, ALLOCATABLE        :: GPFORCE_ETYPE(:)        ! currently unused
       REAL, ALLOCATABLE               :: GPFORCE_FXYZ_MXYZ(:,:)  ! currently unused
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
 
       ! GPFORCE is unsupported for buckling decks
       IF (SOL_NAME(1:8) == "BUCKLING") THEN
-         IF (WRT_LOG >= SUBR_BEGEND) THEN
-            CALL OURTIM
-            WRITE(F04,9002) SUBR_NAME,TSEC
-         ENDIF
          RETURN
       ENDIF
 
       ! Print some summary info for max abs value of GP force balance for each solution vector
       IS_GPFORCE_SUMMARY_INFO = (DEBUG(192) > 0)
-
-      ! Write problem answers (displs, etc) to filename.ANS as well as to filename.F06
-      ! (where filename is the name of the DAT data file submitted to MYSTRAN).
-      ! This feature is generally only useful to the author when performing checkout of test problem answers
-      WRITE_ANS = (PRTANS == 'Y')
 
       IS_THERMAL = (SUBLOD(INT_SC_NUM,2) > 0)
       IS_MODES = ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL'))
@@ -270,45 +255,7 @@
                WRITE(F06,9200)
             ENDIF
          ENDIF
-
-         IF (WRITE_ANS) THEN
-            WRITE(ANS,*)
-            WRITE(ANS,*)
-            IF    (SOL_NAME(1:7) == 'STATICS') THEN
-               WRITE(ANS,9101) SCNUM(JVEC)
-
-            ELSE IF (SOL_NAME(1:5) == 'MODES') THEN
-               WRITE(ANS,9102) JVEC
-
-            ELSE IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN   ! Write info on what CB DOF the output is for
-
-               IF ((JVEC <= NDOFR) .OR. (JVEC >= NDOFR+NVEC)) THEN
-                  IF (JVEC <= NDOFR) THEN
-                     BNDY_DOF_NUM = JVEC
-                  ELSE
-                     BNDY_DOF_NUM = JVEC-(NDOFR+NVEC)
-                  ENDIF
-                  CALL GET_GRID_AND_COMP ( 'R ', BNDY_DOF_NUM, BNDY_GRID, BNDY_COMP  )
-               ENDIF
-
-               IF       (JVEC <= NDOFR) THEN
-                  WRITE(ANS,9103) JVEC, NUM_CB_DOFS, 'acceleration', BNDY_GRID, BNDY_COMP
-               ELSE IF ((JVEC > NDOFR) .AND. (JVEC <= NDOFR+NVEC)) THEN
-                  WRITE(ANS,9105) JVEC, NUM_CB_DOFS, JVEC-NDOFR
-               ELSE
-                  WRITE(ANS,9103) JVEC, NUM_CB_DOFS, 'displacement', BNDY_GRID, BNDY_COMP
-               ENDIF
-
-            ENDIF
-
-            WRITE(ANS,*)
-            IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
-               WRITE(ANS,8999)
-            ELSE
-               WRITE(ANS,9200)
-            ENDIF
-
-         ENDIF
+         
       ENDIF
 
       ! Process grid point force balance output requests.
@@ -356,7 +303,7 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
          !FLUSH(ERR)
          IB = IAND(GROUT(I,INT_SC_NUM),IBIT(GROUT_GPFO_BIT))
          GRID_NUM  = GRID(I,1)
-         CALL GET_GRID_NUM_COMPS ( GRID_NUM, NUM_COMPS, SUBR_NAME )
+         CALL GET_GRID_NUM_COMPS ( I, NUM_COMPS, SUBR_NAME )
 
          IF ((IB > 0) .AND. (NUM_COMPS == 6)) THEN         ! Do not do force balance for SPOINT's
             G_CID = GRID(I,3)
@@ -442,17 +389,13 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
       DO I=1,NGRID
          IB = IAND(GROUT(I,INT_SC_NUM),IBIT(GROUT_GPFO_BIT))
          GRID_NUM  = GRID(I,1)
-         CALL GET_GRID_NUM_COMPS ( GRID_NUM, NUM_COMPS, SUBR_NAME )
+         CALL GET_GRID_NUM_COMPS ( I, NUM_COMPS, SUBR_NAME )
 
          IF ((IB > 0) .AND. (NUM_COMPS == 6)) THEN         ! Do not do force balance for SPOINT's
             G_CID = GRID(I,3)
             IF (WRITE_F06) THEN
                WRITE(F06,9201) GRID_NUM, G_CID
                WRITE(F06,9202)
-            ENDIF
-            IF (WRITE_ANS) THEN
-               WRITE(ANS,9201) GRID_NUM, G_CID
-               WRITE(ANS,9202)
             ENDIF
 
             ! Get element equiv thermal loads so we can sub them from applied loads
@@ -494,7 +437,7 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
             ! get applied load, thermal load, SPC force, MPC force for a single node
             CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, GRID_NUM, IGRID )
             ROW_NUM_START = TDOF_ROW_START(IGRID)
-            CALL GET_GRID_NUM_COMPS ( GRID_NUM, NUM_COMPS, SUBR_NAME )
+            CALL GET_GRID_NUM_COMPS ( I, NUM_COMPS, SUBR_NAME )
             DO J=1,NUM_COMPS
                CALL TDOF_COL_NUM ( 'G ', G_SET_COL )
                TDOF_ROW = ROW_NUM_START + J - 1
@@ -607,18 +550,6 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
                ENDIF
             ENDIF
 
-            IF (WRITE_ANS) THEN
-               IF (IS_APP) WRITE(ANS,9203) (PG1(J),J=1,6)  ! applied load
-               IF (IS_THERMAL) THEN
-                  WRITE(ANS,9204) (-PTET(J),J=1,6)  ! thermal
-               ENDIF
-               IF(IS_SPC) WRITE(ANS,9205) (QGs1(J),J=1,6)  ! spc force
-               IF(IS_MPC) WRITE(ANS,9206) (QGm1(J),J=1,6)  ! mpc force
-               IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
-                  WRITE(ANS,9207) (-FG1(J),J=1,6)  ! inertia force
-               ENDIF
-            ENDIF
-
             ! Calc elem forces
             OPT(1) = 'N'  ! OPT(1) is for calc of ME
             OPT(2) = 'Y'  ! OPT(2) is for calc of PTE
@@ -666,9 +597,6 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
                      ENDIF
                      INODE_GPFORCE = INODE_GPFORCE + 1
                      IF (WRITE_F06) WRITE(F06,9209) TYPE, EID, (-PEG1(L),L=1,6)  ! element forces
-                     IF (WRITE_ANS) THEN
-                        WRITE(ANS,9209) TYPE, EID, (-PEG1(L),L=1,6)
-                     ENDIF
                   ENDIF
                ENDDO
             ENDDO
@@ -708,19 +636,6 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
                ENDDO
             ENDIF
 
-            IF (WRITE_ANS) THEN
-               WRITE(ANS,9210)
-               IF ((SOL_NAME(1:5) == 'MODES') .OR. (SOL_NAME(1:12) == 'GEN CB MODEL')) THEN
-                  IF (NDOFO == 0) THEN
-                     WRITE(ANS,9211) (TOTALS(J),J=1,6)
-                  ELSE
-                     WRITE(ANS,9310) (TOTALS(J),J=1,6)
-                  ENDIF
-               ELSE
-                  WRITE(ANS,9211) (TOTALS(J),J=1,6)  ! KEEP THIS
-               ENDIF
-            ENDIF
-
          ENDIF
          !FLUSH(F06)
          !FLUSH(ERR)
@@ -739,7 +654,7 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
          CALL COUNTER_PROGRESS(I)
       ENDDO
       WRITE(SC1,*) CR13
-      IF (WRITE_F06 .OR. WRITE_ANS) THEN
+      IF (WRITE_F06) THEN
           CALL CALCULATE_GPFB_IMBALANCE(CHAR_PCT, MAX_ABS, MAX_ABS_PCT, MAX_ABS_GRID, MAX_ABS_ALL_GRDS)
       ENDIF
 
@@ -821,15 +736,9 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
       ENDIF
       FLUSH(OP2)
       FLUSH(F06)
-      !FLUSH(ANS)
       FLUSH(ERR)
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
+
 
       RETURN
 
@@ -944,7 +853,7 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
       !  - calc % of grid force imbalance as a % of the largest
       !    force item in that component
       USE PENTIUM_II_KIND, ONLY       :  BYTE, SHORT, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  ANS, F06
+      USE IOUNT1, ONLY                :  F06
       USE CONSTANTS_1, ONLY           :  ZERO
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
 
@@ -978,16 +887,6 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
             ENDIF
             WRITE(F06,9218) (MAX_ABS_GRID(I),I=1,6)
          ENDIF
-         IF (WRITE_ANS) THEN
-            WRITE(ANS,9214)
-            WRITE(ANS,9202)
-            WRITE(ANS,9215) (MAX_ABS_ALL_GRDS(I),I=1,6)
-            IF (DEBUG(192) > 1) THEN
-               WRITE(ANS,9216) (MAX_ABS(I),I=1,6)
-               WRITE(ANS,9217) (CHAR_PCT(I),I=1,6)
-            ENDIF
-            WRITE(ANS,9218) (MAX_ABS_GRID(I),I=1,6)
-         ENDIF
       ENDIF
 
  9202 FORMAT(1X,   '                              T1            T2            T3            R1            R2            R3',/)
@@ -1011,7 +910,7 @@ i_do1:   DO I=1,NGRID                                      ! (2) Set initial val
       SUBROUTINE OUTPUT2_WRITE_OGF(ISUBCASE, NUM, TITLE, SUBTITLE, LABEL, &
                                    ANALYSIS_CODE, FIELD5_INT_MODE, FIELD6_EIGENVALUE)
 !     writes the grid point force results header.
-!     Data is first written to character variables and then that character variable is output the F06 and ANS.
+!     Data is first written to character variables and then that character variable is output the F06.
 !     
 !     Parameters
 !     ==========

@@ -141,10 +141,6 @@
 !        DEBUG  67    Not used
 !        DEBUG  80  > 0 print LAPACK_S scale factors, in subr EQUILIBRATE, used to equilibrate the stiffness matrices
 
-!        DEBUG  81  = 1 print data from subr MATADD_SSS_NTERM
-!                     2 print data from subr MATADD_SSS
-!                     3 print data from both subrs
- 
 !        DEBUG  82  = 1 print data from subr MATMULT_SFF
 
 !        DEBUG  83  = 1 print data from subr MATMULT_SFS_NTERM
@@ -184,8 +180,6 @@
 
 !        DEBUG 106  > 0 write info on all files in subr WRITE_ALLOC_MEM_TABLE (if 0 only write for those arrays that have memory
 !                       allocated to them
-
-!        DEBUG 107  > 0 write allocated memory in F04 file with 6 decimal points (3 if DEBUG(107) = 0)
 
 !        DEBUG 108  > 0 write EDAT table
 
@@ -272,10 +266,6 @@
 !        DEBUG 198  > 0 write debug info in subr QPLT3
 
 !        DEBUG 199  > 0 check matrix times its inverse = identity matrix in
-
-!        DEBUG 200  > 0 write problem answers (displs, etc) to filename.ANS as well as to filename.F06 (where filename is the name
-!                       of the DAT data deck submitted to MYSTRAN. This feature is generally only useful to the author when
-!                       performing checkout of test problem answers
 
 !        DEBUG 201 /= 0 allow SOL = BUCKLING or DIFFEREN to run even if some elements are not coded for these soln's
 

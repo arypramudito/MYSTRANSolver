@@ -29,15 +29,13 @@
       ! Writes blocks of element ply stresses for one subcase one
       ! element type for elements with PCOMP properties.
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_ERR, WRT_LOG, ANS, ERR, F04, F06, OP2
+      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, OP2
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, BARTOR, INT_SC_NUM, LPCOMP_PLIES, NDOFR, NUM_CB_DOFS,            &
                                          SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO
-      USE PARAMS, ONLY                :  PRTANS
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE NONLINEAR_PARAMS, ONLY      :  LOAD_ISTEP
-      USE SUBR_BEGEND_LEVELS, ONLY    :  WRITE_PLY_STRESSES_BEGEND
       USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, FTNAME, OGEL
       USE MODEL_STUF, ONLY            :  ANY_FAILURE_THEORY, ELEM_ONAME, LABEL, PCOMP, SCNUM, STITLE, TITLE
       USE CC_OUTPUT_DESCRIBERS, ONLY  :  STRE_OPT
@@ -60,7 +58,7 @@
       INTEGER(LONG)                   :: BDY_GRID          ! Grid for a boundary DOF in CB analyses
       INTEGER(LONG)                   :: BDY_DOF_NUM       ! DOF number for BDY_GRID/BDY_COMP
       INTEGER(LONG)                   :: I,J               ! DO loop indices
-      INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = WRITE_PLY_STRESSES_BEGEND
+
   
       REAL(DOUBLE)                    :: ABS_ANS(10)       ! Max ABS for all grids output for each of the 6 disp components
       REAL(DOUBLE)                    :: MAX_ANS(10)       ! Max for all grids output for each of the 6 disp components
@@ -84,7 +82,6 @@
       INTEGER(LONG)                   :: NTOTAL                 ! the number of bytes for all NVALUES
       INTEGER(LONG)                   :: ISUBCASE               ! the subcase ID
       LOGICAL                         :: DEBUG_OP2              ! flag
-      LOGICAL                         :: WRITE_ANS              ! flag
 
       INTRINSIC                       :: MAX, MIN, DABS
 
@@ -93,15 +90,9 @@
       ANALYSIS_CODE = -1
       ELEMENT_TYPE = -1
       DEVICE_CODE = 1
-      WRITE_ANS = (PRTANS == 'Y')
       DEBUG_OP2 = .FALSE.
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
       FILL(1:) = ' '
@@ -232,69 +223,6 @@
                WRITE(F06,1499) FILL(1: 0), FILL(1: 0), FILL(1: 0), FILL(1: 0)
             ENDIF
          ENDIF
-
-         IF (WRITE_ANS) THEN
-            WRITE(ANS,*)
-            WRITE(ANS,*)
-            IF    ((SOL_NAME(1:7) == 'STATICS') .OR. (SOL_NAME(1:8) == 'NLSTATIC')) THEN
-               WRITE(ANS,101) SCNUM(JSUB)
-
-            ELSE IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 1)) THEN
-               WRITE(ANS,101) SCNUM(JSUB)
-
-            ELSE IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 2)) THEN
-               WRITE(ANS,101) JSUB
-
-            ELSE IF (SOL_NAME(1:5) == 'MODES') THEN
-               WRITE(ANS,102) JSUB
-
-            ELSE IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN   ! Write info on what CB DOF the output is for
-
-               IF ((JSUB <= NDOFR) .OR. (JSUB >= NDOFR+NUM_CB_DOFS)) THEN 
-                  IF (JSUB <= NDOFR) THEN
-                     BDY_DOF_NUM = JSUB
-                  ELSE
-                     BDY_DOF_NUM = JSUB-(NDOFR+NUM_CB_DOFS)
-                  ENDIF
-                  CALL GET_GRID_AND_COMP ( 'R ', BDY_DOF_NUM, BDY_GRID, BDY_COMP  )
-               ENDIF
-
-               IF       (JSUB <= NDOFR) THEN
-                  WRITE(ANS,103) JSUB, NUM_CB_DOFS, 'acceleration', BDY_GRID, BDY_COMP
-               ELSE IF ((JSUB > NDOFR) .AND. (JSUB <= NDOFR+NUM_CB_DOFS)) THEN
-                  WRITE(ANS,104) JSUB, NUM_CB_DOFS, JSUB-NDOFR
-               ELSE
-                  WRITE(ANS,103) JSUB, NUM_CB_DOFS, 'displacement', BDY_GRID, BDY_COMP
-               ENDIF
-
-            ENDIF
-
-            WRITE(ANS,*)
-
-            IF (SOL_NAME(1:12) == 'GEN CB MODEL') THEN
-               WRITE(ANS,302) FILL(1:16)
-            ELSE
-               WRITE(ANS,301) FILL(1:16)
-            ENDIF
-            IF (ANY_FAILURE_THEORY == 'N') THEN
-               IF (STRE_OPT == 'VONMISES') THEN
-                  WRITE(ANS,1401) FILL(1:16), ONAME, FILL(1: 0), FILL(1: 0)
-                  WRITE(ANS,1499) FILL(1: 0), FILL(1: 0), FILL(1: 0), FILL(1: 0)
-               ELSE
-                  WRITE(ANS,1402) FILL(1:16), ONAME, FILL(1: 0), FILL(1: 0)
-                  WRITE(ANS,1499) FILL(1: 0), FILL(1: 0), FILL(1: 0), FILL(1: 0)
-               ENDIF
-            ELSE
-               IF (STRE_OPT == 'VONMISES') THEN
-                  WRITE(ANS,1403) FILL(1:16), ONAME, FILL(1: 0), FILL(1: 0)
-                  WRITE(ANS,1499) FILL(1: 0), FILL(1: 0), FILL(1: 0), FILL(1: 0)
-               ELSE
-                  WRITE(ANS,1404) FILL(1:16), ONAME, FILL(1: 0), FILL(1: 0)
-                  WRITE(ANS,1499) FILL(1: 0), FILL(1: 0), FILL(1: 0), FILL(1: 0)
-               ENDIF
-            ENDIF
-
-         ENDIF
  
       ENDIF
  
@@ -358,13 +286,6 @@
                WRITE(F06,1408) FILL(1: 0), EID_OUT_ARRAY(I,2), (OGEL(I,J),J=1,9)
             ENDIF
          ENDIF
-         IF (PRTANS == 'Y') THEN
-            IF (ANY_FAILURE_THEORY == 'Y') THEN
-               WRITE(ANS,1416) EID_OUT_ARRAY(I,1), EID_OUT_ARRAY(I,2), (OGEL(I,J),J=1,9)
-            ELSE
-               WRITE(ANS,1416) EID_OUT_ARRAY(I,1), EID_OUT_ARRAY(I,2), (OGEL(I,J),J=1,9)
-            ENDIF
-         ENDIF
 
       ENDDO
 
@@ -400,16 +321,8 @@
                       FILL(1: 0)            , (MIN_ANS(I),I=1,10),                                                                 &
                       FILL(1: 0)            , (ABS_ANS(I),I=1,10), FILL(1: 0)
 
-      IF (PRTANS == 'Y') THEN
-         WRITE(ANS,1419) (MAX_ANS(I),I=1,10), (MIN_ANS(I),I=1,10), (ABS_ANS(I),I=1,10)
-      ENDIF
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
+
 
       RETURN
 
@@ -478,13 +391,6 @@
              1X,A,'ABS* :  ',6X,3(1ES13.5),2X,2(1ES14.5),0PF9.3,3(1ES13.5),1ES10.2,/,                                              &
              1X,A,'*for output set')
 
- 1416 FORMAT(11X,I8,I5,5(1ES14.6),0PF14.3,3(1ES14.6),1ES14.6)
-
- 1419 FORMAT(30X,'------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------',&
-                ' ------------- -------------',/,&
-             1X,'MAX (for output set): ',1X,5(ES14.6),0PF14.3,4(ES14.6),/,                                                         &
-             1X,'MIN (for output set): ',1X,5(ES14.6),0PF14.3,4(ES14.6),//,                                                        &
-             1X,'ABS (for output set): ',1X,5(ES14.6),0PF14.3,4(ES14.6))
 
 ! **********************************************************************************************************************************
  

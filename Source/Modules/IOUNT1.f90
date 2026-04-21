@@ -55,12 +55,10 @@
 
 ! Following are the variable names for all files (except for units SC1, SCR, which do not have file names) used by Program
 
-      CHARACTER(FILE_NAM_MAXLEN*BYTE) :: ANSFIL                ! (filename.ANS) On ly has answers from LINK9
       CHARACTER(FILE_NAM_MAXLEN*BYTE) :: BUGFIL                ! (filename.BUG) Debug file: ELDATA C.C. request elem debug info
       CHARACTER(FILE_NAM_MAXLEN*BYTE) :: EINFIL                ! (filename.EIN) Eigenvector scale factors (used to change signs)
       CHARACTER(FILE_NAM_MAXLEN*BYTE) :: ENFFIL                ! (filename.ENF) Enforced displs - file for DOF's that are enforced
       CHARACTER(FILE_NAM_MAXLEN*BYTE) :: ERRFIL                ! (filename.ERR) Error file: error messages written (and to F06)
-      CHARACTER(FILE_NAM_MAXLEN*BYTE) :: F04FIL                ! (filename.F04) Log file (subroutine begin/end times)    
       CHARACTER(FILE_NAM_MAXLEN*BYTE) :: F06FIL                ! (filename.F06) Output file
       CHARACTER(FILE_NAM_MAXLEN*BYTE) :: IN0FIL                ! (filename.F06) Input file with all INCLUDE files
       CHARACTER(FILE_NAM_MAXLEN*BYTE) :: INFILE                ! (filename.DAT) Input file  
@@ -143,13 +141,11 @@
 ! are PARAMETER. These are files that the user would not want to be deleted (BUGFIL would want to be kept but only if something
 ! has been written to it
                                         
-      CHARACTER(  8*BYTE)             :: ANSSTAT       = 'DELETE  '  ! close status for file ANSFIL 
       CHARACTER(  8*BYTE)             :: BUGSTAT       = 'DELETE  '  ! close status for file BUGFIL 
       CHARACTER(  8*BYTE)             :: EINSTAT       = 'KEEP    '  ! close status for file EINFIL 
       CHARACTER(  8*BYTE)             :: ENFSTAT       = 'KEEP    '  ! close status for file ENFFIL 
       CHARACTER(  8*BYTE)             :: ERRSTAT       = 'KEEP    '  ! close status for file ERRFIL 
-      CHARACTER(  8*BYTE)             :: F04STAT       = 'DELETE  '  ! close status for file F06FIL 
-      CHARACTER(  8*BYTE)             :: F06STAT       = 'KEEP    '  ! close status for file F04FIL 
+      CHARACTER(  8*BYTE)             :: F06STAT       = 'KEEP    '  ! close status for file F06FIL 
       CHARACTER(  8*BYTE)             :: IN0STAT       = 'KEEP    '  ! close status for file INFILE plus all INCLUDE files
       CHARACTER(  8*BYTE)             :: IN1STAT       = 'KEEP    '  ! close status for file INFILE 
       CHARACTER(  8*BYTE)             :: IN4STAT       = 'KEEP    '  ! close status for file IN4FIL 
@@ -227,16 +223,13 @@
 
       CHARACTER(  8*BYTE)             :: BUGSTAT_OLD   = 'DELETE  '  ! close status for file BUGFIL for use in restart
       CHARACTER(  8*BYTE)             :: ERRSTAT_OLD   = 'DELETE  '  ! close status for file ERRFIL for use in restart
-      CHARACTER(  8*BYTE)             :: F04STAT_OLD   = 'DELETE  '  ! close status for file F04FIL for use in restart
 
 ! The following are messages that describe what the files are (no message for SC1)
 
-      CHARACTER( 64*BYTE)             :: ANS_MSG       = 'PROBLEM ANSWERS'
       CHARACTER( 64*BYTE)             :: BUG_MSG       = 'ELEMENT DEBUG OUTPUT FILE'
       CHARACTER( 64*BYTE)             :: EIN_MSG       = 'EIGENVEC NUMBERS FOR SIGN CHANGE'
       CHARACTER( 64*BYTE)             :: ENF_MSG       = 'ENFORCED DISPL FOR ALL DOFs FILE'
       CHARACTER( 64*BYTE)             :: ERR_MSG       = 'ERROR FILE'
-      CHARACTER( 64*BYTE)             :: F04_MSG       = 'F04 LOG FILE'
       CHARACTER( 64*BYTE)             :: F06_MSG       = 'PROGRAM OUTPUT DATA FILE'
       CHARACTER( 64*BYTE)             :: IN0_MSG       = 'PROGRAM INPUT DATA FILE WITH ALL INCLUDE FILES'
       CHARACTER( 64*BYTE)             :: IN1_MSG       = 'PROGRAM INPUT DATA FILE'
@@ -331,12 +324,10 @@
 
       INTEGER(LONG)                   :: SC1           =    6 ! Unit no. for screen
 
-      INTEGER(LONG)                   :: ANS           =    1 ! Unit no. for answer file
       INTEGER(LONG)                   :: BUG           =    2 ! Unit no. for debug output file
       INTEGER(LONG)                   :: EIN           = 1001 ! Unit no. for text file w/ eigenvec scale facs (if supplied)
       INTEGER(LONG)                   :: ENF           = 1002 ! Unit no. for text file w/ enforced displ for all grids/comps
       INTEGER(LONG)                   :: ERR           =    3 ! Unit no. for error file
-      INTEGER(LONG)                   :: F04           =    4 ! Unit no. for log file
       INTEGER(LONG)                   :: F06           =    7 ! Unit no. for output file
       INTEGER(LONG)                   :: IN0           = 1003 ! Unit no. for input file with all INCLUDE files
       INTEGER(LONG)                   :: IN1           =    8 ! Unit no. for input file 
@@ -424,7 +415,7 @@
                                                               ! Unit no's. for  scratch files
       INTEGER(LONG)                   :: SCR(9)        = (/991,992,993,994,995,996,997,998,999/)
 
-! The following are indicators of whether to write to BUG, ERR, F04
+! The following are indicators of whether to write to BUG, ERR
 
       INTEGER(LONG)                   :: WRT_BUG(0:MBUG-1)  = (/(0, I=0,MBUG-1)/)
                                                                ! WRT_BUG specifies what to write to the BUG file. Set by C.C. ELDATA
@@ -434,13 +425,9 @@
 
       INTEGER(LONG)                   :: WRT_ERR = 1           ! WRT_ERR says whether to write ERR file or not
 
-      INTEGER(LONG)                   :: WRT_LOG = 0           ! WRT_LOG specifies the level of detail to be written to the LOG file
 
 ! Description of files:
 ! ---------------------
-
-! ANSFIL is a formatted file containing only the answers from LINK9. It is only generated if a DEBUG parameter is set and is
-!        used in checkout of MYSTRAN (for comparing answers to the archive answers)
 
 ! BUGFIL is a formatted file containing element data written if ELDATA Case Control requests are made
 
@@ -450,8 +437,6 @@
 ! ENFFIL is a text file containing enforced displs for all grids/components (used when Case Control ENFORCED is present)
 
 ! ERRFIL is a formatted file containing all warning and error messages (also written to F06FIL)
-
-! F04FIL is a formatted file containing subr begin/end times (log file)
 
 ! F06FIL is a formatted file containing the normal output from MYSTRAN
 

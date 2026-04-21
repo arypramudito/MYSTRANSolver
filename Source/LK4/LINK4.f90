@@ -53,13 +53,12 @@
 
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_BUG, WRT_ERR, WRT_LOG, ERR, ERRSTAT, F04, F06, L1M, L3A, SC1
+      USE IOUNT1, ONLY                :  WRT_BUG, WRT_ERR, ERR, ERRSTAT, F06, L1M, L3A, SC1
       USE IOUNT1, ONLY                :  LINK1M,  LINK2I,  LINK3A, L1M_MSG, L3A_MSG
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, COMM, FATAL_ERR, LINKNO, MBUG, NDOFL,                                       &
                                          NTERM_KLL, NTERM_KLLD, NTERM_KLLDn,                                                       &
                                          NTERM_MLL, NTERM_MLLn,                                                                    &
                                          NVEC, NUM_EIGENS, NUM_KLLD_DIAG_ZEROS, NUM_MLL_DIAG_ZEROS, SOL_NAME, WARN_ERR
-      USE TIMDAT, ONLY                :  YEAR, MONTH, DAY, HOUR, MINUTE, SEC, SFRAC, STIME, TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
       USE PARAMS, ONLY                :  EPSIL, SOLLIB, SPARSTOR, SUPINFO
       USE MODEL_STUF, ONLY            :  EIG_COMP, EIG_CRIT, EIG_FRQ1, EIG_FRQ2, EIG_GRID, EIG_METH, EIG_MSGLVL, EIG_LAP_MAT_TYPE, &
@@ -74,12 +73,12 @@
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
 
       USE LINK4_USE_IFs
-
+      USE LINK_MESSAGE_Interface
+      
       IMPLICIT NONE
 
       CHARACTER, PARAMETER            :: CR13 = CHAR(13)   ! This causes a carriage return simulating the "+" action in a FORMAT
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'LINK4'
-      CHARACTER( 44*BYTE)             :: MODNAM              ! Name to write to screen to describe module being run.
 
       INTEGER(LONG)                   :: I,J                 ! DO loop indices or counters.
       INTEGER(LONG)                   :: IERROR              ! Error count when reading records from a file.
@@ -119,13 +118,10 @@
 
       ! Write info to text files
       WRITE(F06,150) LINKNO
-      IF (WRT_LOG > 0) THEN
-         WRITE(F04,150) LINKNO
-      ENDIF
       WRITE(ERR,150) LINKNO
 
       ! Read LINK1A file
-      CALL READ_L1A ( 'KEEP', 'Y' )
+      CALL READ_L1A ( 'KEEP' )
 
       ! Check COMM for successful completion of prior LINKs
       IF (COMM(P_LINKNO) /= 'C') THEN
@@ -195,14 +191,10 @@
             CALL SPARSE_MAT_DIAG_ZEROS ( 'KLLD', NDOFL, NTERM_KLLD, I_KLLD, J_KLLD, NUM_KLLD_DIAG_ZEROS )
             NTERM_KLLDn = 2*NTERM_KLLD  - (NDOFL - NUM_KLLD_DIAG_ZEROS)
 
-            CALL OURTIM
-            MODNAM = 'ALLOCATE SPARSE KLLDn ARRAYS'
-            WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+            CALL LINK_MESSAGE('ALLOCATE SPARSE KLLDn ARRAYS')
             CALL ALLOCATE_SPARSE_MAT ( 'KLLDn', NDOFL, NTERM_KLLDn, SUBR_NAME )
 
-            CALL OURTIM
-            MODNAM = 'CONVERT SYM CRS KLLD TO NONSYM CRS KLLDn'
-            WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+            CALL LINK_MESSAGE('CONVERT SYM CRS KLLD TO NONSYM CRS KLLDn')
             CALL CRS_SYM_TO_CRS_NONSYM ( 'KLLD', NDOFL, NTERM_KLLD, I_KLLD, J_KLLD, KLLD, 'KLLDn', NTERM_KLLDn,                    &
                                          I_KLLDn, J_KLLDn, KLLDn, 'Y' )
 
@@ -211,14 +203,10 @@
             CALL SPARSE_MAT_DIAG_ZEROS ( 'MLL', NDOFL, NTERM_MLL, I_MLL, J_MLL, NUM_MLL_DIAG_ZEROS )
             NTERM_MLLn = 2*NTERM_MLL  - (NDOFL - NUM_MLL_DIAG_ZEROS)
 
-            CALL OURTIM
-            MODNAM = 'ALLOCATE SPARSE MLLn ARRAYS'
-            WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+            CALL LINK_MESSAGE('ALLOCATE SPARSE MLLn ARRAYS')
             CALL ALLOCATE_SPARSE_MAT ( 'MLLn', NDOFL, NTERM_MLLn, SUBR_NAME )
 
-            CALL OURTIM
-            MODNAM = 'CONVERT SYM CRS MLL TO NONSYM CRS MLLn'
-            WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+            CALL LINK_MESSAGE('CONVERT SYM CRS MLL TO NONSYM CRS MLLn')
             CALL CRS_SYM_TO_CRS_NONSYM ( 'MLL', NDOFL, NTERM_MLL, I_MLL, J_MLL, MLL, 'MLLn', NTERM_MLLn, I_MLLn, J_MLLn, MLLn, 'Y' )
 
          ENDIF
@@ -227,16 +215,11 @@
 
          IF (SOL_NAME(1:8) == 'BUCKLING') THEN
 
-            CALL OURTIM
-
-            MODNAM = 'ALLOCATE ARRAYS FOR NONSYM STORAGE OF KLLD'
-            WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+            CALL LINK_MESSAGE('ALLOCATE ARRAYS FOR NONSYM STORAGE OF KLLD')
             NTERM_KLLDn = NTERM_KLLD
             CALL ALLOCATE_SPARSE_MAT ( 'KLLDn', NDOFL, NTERM_KLLDn, SUBR_NAME )
 
-            CALL OURTIM
-            MODNAM = 'GET VALUES FOR NONSYM FORM OF KLLD'
-            WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+            CALL LINK_MESSAGE('GET VALUES FOR NONSYM FORM OF KLLD')
             DO I=1,NDOFL+1
                I_KLLDn(I) = I_KLLD(I)
             ENDDO
@@ -247,15 +230,11 @@
 
          ELSE
 
-            CALL OURTIM
-            MODNAM = 'ALLOCATE ARRAYS FOR NONSYM STORAGE OF MLL'
-            WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+            CALL LINK_MESSAGE('ALLOCATE ARRAYS FOR NONSYM STORAGE OF MLL')
             NTERM_MLLn = NTERM_MLL
             CALL ALLOCATE_SPARSE_MAT ( 'MLLn', NDOFL, NTERM_MLLn, SUBR_NAME )
 
-            CALL OURTIM
-            MODNAM = 'GET VALUES FOR NONSYM FORM OF MLL'
-            WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+            CALL LINK_MESSAGE('GET VALUES FOR NONSYM FORM OF MLL')
             DO I=1,NDOFL+1
                I_MLLn(I) = I_MLL(I)
             ENDDO
@@ -323,15 +302,13 @@
       CALL ALLOCATE_EIGEN1_MAT ( 'GEN_MASS', NUM_EIGENS, 1, SUBR_NAME )
 
       IF (NVEC > 0) THEN
-         CALL OURTIM                                       ! Calc gen mass
-         MODNAM = 'CALCULATE GENERALIZED MASS'
-         WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+                                                           ! Calc gen mass
+         CALL LINK_MESSAGE('CALCULATE GENERALIZED MASS')
          CALL CALC_GEN_MASS
 
          IF (EIG_NORM == 'MASS') THEN
-            CALL OURTIM                                    ! Renorm vecs to mass if user asked for 'MASS'.
-            MODNAM = 'RENORMALIZE EIGENVECTORS TO UNIT GEN MASS'
-            WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+                                                           ! Renorm vecs to mass if user asked for 'MASS'.
+            CALL LINK_MESSAGE('RENORMALIZE EIGENVECTORS TO UNIT GEN MASS')
             CALL RENORM_ON_MASS ( NVEC, EPS1 )
          ENDIF
 
@@ -355,26 +332,22 @@
 
       ! Write eigenvalue analysis summary to output file
       ! if DEBUG requested them or if renormalization is on 'MASS' or 'NONE'
-      MODNAM = 'WRITE EIGENVALUE SUMMARY TO OUTFIL'
       IF ((EIG_NORM == 'MASS    ') .OR. (EIG_NORM == 'NONE')) THEN
-         CALL OURTIM
-         WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+         CALL LINK_MESSAGE('WRITE EIGENVALUE SUMMARY TO OUTFIL')
          CALL EIG_SUMMARY
       ENDIF
 
       ! Open and set up file L3A (used to hold eigenvectors)
-      CALL FILE_OPEN ( L3A, LINK3A, OUNT, 'REPLACE', L3A_MSG, 'WRITE_STIME', 'UNFORMATTED', 'WRITE', 'REWIND', 'Y', 'N', 'Y' )
+      CALL FILE_OPEN ( L3A, LINK3A, OUNT, 'REPLACE', L3A_MSG, 'WRITE_STIME', 'UNFORMATTED', 'WRITE', 'REWIND', 'Y', 'N' )
 
       ! Write out computed eigenvectors to L3A
-      CALL OURTIM
-      MODNAM = 'WRITE EIGENVECTORS TO DISK FILE'
-      WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+      CALL LINK_MESSAGE('WRITE EIGENVECTORS TO DISK FILE')
       DO J=1,NVEC
          DO I=1,NDOFL
            WRITE(L3A) EIGEN_VEC(I,J)
          ENDDO
       ENDDO
-      CALL FILE_CLOSE ( L3A, LINK3A, 'KEEP', 'Y' )
+      CALL FILE_CLOSE ( L3A, LINK3A, 'KEEP' )
 
       ! Optional eigenvector debug output
       IF (DEBUG(43) == 1) THEN
@@ -389,9 +362,7 @@
 
       ! Call OUTPUT4 processor to process output requests for OUTPUT4 matrices generated in this link
       IF (NUM_OU4_REQUESTS > 0) THEN
-         CALL OURTIM
-         MODNAM = 'WRITE OUTPUT4 NATRICES      '
-         WRITE(SC1,4092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+         CALL LINK_MESSAGE('WRITE OUTPUT4 NATRICES      ')
          WRITE(F06,*)
          CALL OUTPUT4_PROC ( SUBR_NAME )
       ENDIF
@@ -412,7 +383,7 @@
       COMM(LINKNO) = 'C'
 
       ! Write data to L1A
-      CALL WRITE_L1A ( 'KEEP', 'Y', 'Y' )
+      CALL WRITE_L1A ( 'KEEP', 'Y' )
 
       ! Check allocation status of allocatable arrays, if requested
       IF (DEBUG(100) > 0) THEN
@@ -422,11 +393,8 @@
          ENDIF
       ENDIF
 
-      ! Write LINK4 end to F04, F06
+      ! Write LINK4 end to F06
       CALL OURTIM
-      IF (WRT_LOG > 0) THEN
-         WRITE(F04,151) LINKNO
-      ENDIF
       WRITE(F06,151) LINKNO
 
       ! Close files
@@ -455,8 +423,6 @@
 
  4005 FORMAT(' *ERROR  4005: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
                     ,/,14X,' CODE ONLY WRITTEN FOR METHOD = GIV, MGIV, OR LANCZOS BUT METHOD IS = ',A8)
-
- 4092 FORMAT(1X,I2,'/',A44,18X,2X,I2,':',I2,':',I2,'.',I3)
 
  9101 FORMAT(1X,A,' =  ','"',A,'"')
 

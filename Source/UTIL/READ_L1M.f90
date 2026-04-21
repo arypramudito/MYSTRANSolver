@@ -31,8 +31,7 @@
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
  
       USE SCONTR, ONLY                :  LINKNO, NUM_EIGENS
-      USE IOUNT1, ONLY                :  ERR, F06, L1M, L1M_MSG, L1MSTAT, LINK1M, SC1, WRT_ERR, WRT_LOG
-      USE TIMDAT, ONLY                :  HOUR, MINUTE, SEC, SFRAC, STIME, TSEC
+      USE IOUNT1, ONLY                :  ERR, F06, L1M, L1M_MSG, L1MSTAT, LINK1M, SC1, WRT_ERR
       USE EIGEN_MATRICES_1 , ONLY     :  EIGEN_VAL, GEN_MASS, MODE_NUM
 
       USE MODEL_STUF, ONLY            :  EIG_COMP, EIG_CRIT, EIG_FRQ1, EIG_FRQ2, EIG_GRID, EIG_METH, EIG_MSGLVL, EIG_LAP_MAT_TYPE, &
@@ -40,11 +39,11 @@
                                          MIJ_COL, MIJ_ROW, NUM_FAIL_CRIT
 
       USE READ_L1M_USE_IFs
-
+      USE LINK_MESSAGE_Interface
+      
       IMPLICIT NONE
  
       CHARACTER(24*BYTE)              :: ENAME(20)         ! Array of names of recirds read from file LINK1M
-      CHARACTER(54*BYTE)              :: MODNAM            ! Name to write to screen to describe module being run
 
       INTEGER(LONG), INTENT(OUT)      :: IERROR            ! Error count
       INTEGER(LONG)                   :: I                 ! DO loop index
@@ -62,11 +61,9 @@
       OUNT(1) = ERR
       OUNT(2) = F06
 
-      CALL FILE_OPEN ( L1M, LINK1M, OUNT, 'OLD', L1M_MSG, 'READ_STIME', 'UNFORMATTED', 'READ', 'REWIND', 'Y', 'N', 'Y' )
+      CALL FILE_OPEN ( L1M, LINK1M, OUNT, 'OLD', L1M_MSG, 'READ_STIME', 'UNFORMATTED', 'READ', 'REWIND', 'Y', 'N' )
 
-      CALL OURTIM
-      MODNAM = 'READ EIGENVALUE DATA FROM PRIOR LINK'
-      WRITE(SC1,9092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+      CALL LINK_MESSAGE('READ EIGENVALUE DATA FROM PRIOR LINK')
 
       READ(L1M,IOSTAT=IOCHK( 1)) EIG_SID
       READ(L1M,IOSTAT=IOCHK( 2)) EIG_METH
@@ -116,7 +113,7 @@
          REC_NO = REC_NO + 1
          IF (IOCHK(I) /= 0) THEN
             IERROR = IERROR + 1
-            CALL READERR ( IOCHK(I), LINK1M, ENAME(I), REC_NO, OUNT, 'Y' )
+            CALL READERR ( IOCHK(I), LINK1M, ENAME(I), REC_NO, OUNT )
          ENDIF
       ENDDO
 
@@ -125,14 +122,11 @@
          READ(L1M,IOSTAT=IOCHK(1)) MODE_NUM(I), EIGEN_VAL(I), GEN_MASS(I)
          IF (IOCHK(1) /= 0) THEN
             IERROR = IERROR + 1
-            CALL READERR ( IOCHK(1), LINK1M, L1M_MSG, REC_NO, OUNT, 'Y' )
+            CALL READERR ( IOCHK(1), LINK1M, L1M_MSG, REC_NO, OUNT )
          ENDIF
       ENDDO
 
-      CALL FILE_CLOSE ( L1M, LINK1M, 'KEEP', 'Y' )
-
-! **********************************************************************************************************************************
- 9092 FORMAT(1X,I2,'/',A54,8X,2X,I2,':',I2,':',I2,'.',I3)
+      CALL FILE_CLOSE ( L1M, LINK1M, 'KEEP' )
 
 ! **********************************************************************************************************************************
  

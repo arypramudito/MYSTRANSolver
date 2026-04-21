@@ -29,10 +29,9 @@
 ! DOF Processor for MPC's 
  
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_ERR, WRT_LOG, ERR, F04, F06, L1N, L1N_MSG, LINK1N
+      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, L1N, L1N_MSG, LINK1N
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, NAOCARD, NDOFO, NGRID
       USE TIMDAT, ONLY                :  TSEC
-      USE SUBR_BEGEND_LEVELS, ONLY    :  DOF_PROC_BEGEND
       USE DOF_TABLES, ONLY            :  TSET_CHR_LEN, TSET
       USE MODEL_STUF, ONLY            :  GRID, GRID_ID
  
@@ -58,14 +57,9 @@
       INTEGER(LONG)                   :: NUM_COMPS         ! Number of displ components (1 for SPOINT, 6 for physical grid)
       INTEGER(LONG)                   :: OUNT(2)           ! File units to write messages to.   
       INTEGER(LONG)                   :: REC_NO    = 0     ! Record number when reading a file
-      INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = DOF_PROC_BEGEND + 1
+
  
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
 ! Make units for writing errors the error file and output file
@@ -93,7 +87,7 @@
             READ(L1N,IOSTAT=IOCHK) ICOMP,GID1,GID2,DOFSET  ! Read a record from L1N
             REC_NO = REC_NO + 1
             IF (IOCHK /= 0) THEN
-               CALL READERR ( IOCHK, LINK1N, L1N_MSG, REC_NO, OUNT, 'Y' )
+               CALL READERR ( IOCHK, LINK1N, L1N_MSG, REC_NO, OUNT )
                CALL OUTA_HERE ( 'Y' )                      ! Error reading ASET/OMIT file. No sense continuing
             ENDIF
 
@@ -131,7 +125,7 @@
                DO J=GID1,GID2                              ! GID2 > GID1 was checked when ASET/OMIT B.D. cards were read
                   CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, J, GRID_ID_ROW_NUM )
                   IF (GRID_ID_ROW_NUM /= -1) THEN
-                     CALL GET_GRID_NUM_COMPS ( GRID(GRID_ID_ROW_NUM,1), NUM_COMPS, SUBR_NAME )
+                     CALL GET_GRID_NUM_COMPS ( GRID_ID_ROW_NUM, NUM_COMPS, SUBR_NAME )
                      DO K = 1,NUM_COMPS                       
                         IF (CDOF1(K) == '1') THEN
                            IF ((TSET(GRID_ID_ROW_NUM,K) == '  ') .OR. (TSET(GRID_ID_ROW_NUM,K) == DOFSET)) THEN
@@ -155,7 +149,7 @@
 
          IF ((ASET_FND == 'Y').AND.(OMIT_FND == 'N')) THEN ! Make all DOF's not as yet set be O-set
             DO I=1,NGRID
-               CALL GET_GRID_NUM_COMPS ( GRID(I,1), NUM_COMPS, SUBR_NAME )
+               CALL GET_GRID_NUM_COMPS ( I, NUM_COMPS, SUBR_NAME )
                DO K=1,NUM_COMPS
                   IF (TSET(I,K) == '  ') THEN
                      TSET(I,K) = 'O '
@@ -167,7 +161,7 @@
 
          IF ((ASET_FND == 'N').AND.(OMIT_FND == 'Y')) THEN ! Make all DOF's not as yet set be A-set
             DO I=1,NGRID
-               CALL GET_GRID_NUM_COMPS ( GRID(I,1), NUM_COMPS, SUBR_NAME )
+               CALL GET_GRID_NUM_COMPS ( I, NUM_COMPS, SUBR_NAME )
                DO K=1,NUM_COMPS
                   IF (TSET(I,K) == '  ') THEN
                      TSET(I,K) = 'A '
@@ -180,12 +174,7 @@
 
       IERRT = IERRT + GID_ERR + DOF_ERR
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
+
 
       RETURN
 

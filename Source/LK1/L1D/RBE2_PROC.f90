@@ -32,11 +32,10 @@
 ! MPC coefficients) which will be used in LINK2 to reduce the G-set mass, stiffness and load matrices to the N-set. 
  
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_ERR, WRT_LOG, ERR, F04, F06, L1F, LINK1F, L1F_MSG, L1J
+      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, L1F, LINK1F, L1F_MSG, L1J
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, NCORD, NGRID
       USE TIMDAT, ONLY                :  TSEC
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
-      USE SUBR_BEGEND_LEVELS, ONLY    :  RIGID_ELEM_PROC_BEGEND
       USE DOF_TABLES, ONLY            :  TDOF, TDOF_ROW_START
       USE MODEL_STUF, ONLY            :  GRID, RGRID, GRID_ID, CORD
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
@@ -75,7 +74,7 @@
       INTEGER(LONG)                   :: RMG_ROW_NUM       ! Row no. of a term in array RMG
       INTEGER(LONG)                   :: ROW_NUM           ! A row number in array TDOF
       INTEGER(LONG)                   :: ROW_NUM_START     ! DOF number where TDOF data begins for a grid
-      INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = RIGID_ELEM_PROC_BEGEND + 1
+
  
       REAL(DOUBLE)                    :: DELTA_0(3,3)      ! 3 x 3 matrix of diffs in coords bet dep & indep grids in basic coords
       REAL(DOUBLE)                    :: DUM1(3,3)         ! Intermediate result in obtaining RDI_GLOBAL
@@ -86,12 +85,7 @@
       REAL(DOUBLE)                    :: T0G_D(3,3)        ! Transforms a dep   DOF vector in basic coords to global coords
       REAL(DOUBLE)                    :: T0G_I(3,3)        ! Transforms a indep DOF vector in basic coords to global coords
  
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
 ! Make units for writing errors the error file and output file
@@ -102,16 +96,20 @@
       JERR = 0 
 
       READ(L1F,IOSTAT=IOCHK) REID, AGRID_D, DDOF, AGRID_I   
+
+      CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, AGRID_D, GRID_ID_ROW_NUM_D )
+      CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, AGRID_I, GRID_ID_ROW_NUM_I )
+
       REC_NO = REC_NO + 1
       IF (IOCHK == 0) THEN
-         CALL GET_GRID_NUM_COMPS ( AGRID_D, NUM_COMPS_D, SUBR_NAME )
+         CALL GET_GRID_NUM_COMPS ( GRID_ID_ROW_NUM_D, NUM_COMPS_D, SUBR_NAME )
          IF (NUM_COMPS_D /= 6) THEN
             IERR = IERR + 1
             JERR = JERR + 1
             WRITE(ERR,1951) 'RBE2', REID, NUM_COMPS_D
             WRITE(F06,1951) 'RBE2', REID, NUM_COMPS_D
          ENDIF
-         CALL GET_GRID_NUM_COMPS ( AGRID_I, NUM_COMPS_I, SUBR_NAME )
+         CALL GET_GRID_NUM_COMPS ( GRID_ID_ROW_NUM_I, NUM_COMPS_I, SUBR_NAME )
          IF (NUM_COMPS_I /= 6) THEN
             IERR = IERR + 1
             JERR = JERR + 1
@@ -119,7 +117,7 @@
             WRITE(F06,1951) 'RBE2', REID, NUM_COMPS_I
          ENDIF
       ELSE
-         CALL READERR ( IOCHK, LINK1F, L1F_MSG, REC_NO, OUNT, 'Y' )
+         CALL READERR ( IOCHK, LINK1F, L1F_MSG, REC_NO, OUNT )
          IERR = IERR + 1
          JERR = JERR + 1
       ENDIF
@@ -134,7 +132,6 @@
 ! We know that the indep and dep grids (AGRID_I and AGRID_D) exist. This was checked in subr DOF_PROC.
 ! Get the basic-to-global trensformation matrices for AGRID_D and AGRID_I
 
-      CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, AGRID_D, GRID_ID_ROW_NUM_D )
       ECORD_D = GRID(GRID_ID_ROW_NUM_D,3)
       IF (ECORD_D /= 0) THEN
          DO I=1,NCORD
@@ -153,7 +150,6 @@
          ENDDO   
       ENDIF
  
-      CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, AGRID_I, GRID_ID_ROW_NUM_I )
       ECORD_I = GRID(GRID_ID_ROW_NUM_I,3)
       IF (ECORD_I /= 0) THEN
          DO I=1,NCORD
@@ -314,12 +310,7 @@
          WRITE(F06,*)
       ENDIF 
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
+
 
       RETURN
 

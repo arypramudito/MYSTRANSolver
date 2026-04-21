@@ -3,11 +3,10 @@
       MODULE ARPACK_LANCZOS_EIG
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  ERR, F04, F06, SC1, WRT_LOG
+      USE IOUNT1, ONLY                :  ERR, F06, SC1
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
       USE MODEL_STUF, ONLY            :  EIG_MSGLVL
-      USE SUBR_BEGEND_LEVELS, ONLY    :  ARPACK_BEGEND
       USE SuperLU_STUF, ONLY          :  SLU_FACTORS, SLU_INFO
       USE PARAMS, ONLY                :  SOLLIB
       USE ARPACK_UTIL
@@ -20,12 +19,12 @@
       USE OURTIM_Interface
       USE MATMULT_SFF_Interface
       USE ARPACK_INFO_MSG_Interface
+      USE LINK_MESSAGE_Interface
 
       character(1*byte), parameter   :: cr13_a = char(13)
       CHARACTER(44*BYTE)             :: MODNAM1            ! Name to write to screen to describe module being run.
       CHARACTER(44*BYTE)             :: MODNAM2            ! Name to write to screen to describe module being run.
 
-      INTEGER(LONG), PARAMETER, PRIVATE :: SUBR_BEGEND = ARPACK_BEGEND
 c
 c\SCCS Information: @(#)
 c FILE: debug.h   SID: 2.3   DATE OF SID: 11/16/95   RELEASE: 2
@@ -512,7 +511,6 @@ c
 
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'DSBAND'
 
-      INTEGER(LONG)                   :: SUBR_BEGEND = ARPACK_BEGEND
 c
 c     %------------------%
 c     | Scalar Arguments |
@@ -587,12 +585,6 @@ c     %-----------------------%
 c     | Executable Statements |
 c     %-----------------------%
 c
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
       ierr = 0
 ! **********************************************************************************************************************************
 ! B 05/24/04 //////////////////////////////////////////////////////////B
@@ -684,14 +676,12 @@ c
 
             if      (eig_lap_mat_type(1:3) == 'DGB') then
 
-               call ourtim
-!              write(sc1,4092) linkno,modnam1,hour,minute,sec,sfrac
+!               CALL LINK_MESSAGE(modnam1)
                call dgbtrf(n, n, kl, ku, rfac, lda, iwork, ierr)
 
             else if (eig_lap_mat_type(1:3) == 'DPB') then
 
-               call ourtim
-!              write(sc1,4092) linkno,modnam2,hour,minute,sec,sfrac
+!               CALL LINK_MESSAGE(modnam2)
                call dpbtrf ( 'U', n, ku, rfac, ku+1, ierr )
                do i=1,n
                   iwork(i) = i                                                  ! Pivot indices (no pivoting in DPBTRF)
@@ -732,14 +722,12 @@ c
 
             if      (eig_lap_mat_type(1:3) == 'DGB') then
 
-               call ourtim
-!              write(sc1,4092) linkno,modnam1,hour,minute,sec,sfrac
+!               CALL LINK_MESSAGE(modnam1)
                call dgbtrf(n, n, kl, ku, rfac, lda, iwork, ierr)
 
             else if (eig_lap_mat_type(1:3) == 'DPB') then
 
-               call ourtim
-!              write(sc1,4092) linkno,modnam2,hour,minute,sec,sfrac
+!              CALL LINK_MESSAGE(modnam2)
                call dpbtrf ( 'U', n, ku, rfac, ku+1, ierr )
                do i=1,n
                   iwork(i) = i   ! Pivot indices (no pivoting in DPBTRF)
@@ -821,7 +809,6 @@ c
          dsaupd_loop_count = dsaupd_loop_count + 1
       endif
       write(sc1,12345,advance='no') iter+1,dsaupd_loop_count,ido,cr13_a
-      Write(f04, 9876) iter+1, dsaupd_loop_count, ido
 c     Write(f06,*) 'In ARPACK_LANCZOS_EIG: type = ', type
 
 ! **********************************************************************
@@ -1161,27 +1148,18 @@ c
 ! **********************************************************************************************************************************
 12345 format(5X,'Iteration',i4,' Rev comm loop',i4,' with IDO =',i3,a)
 
- 9876 format(7X,'Iteration',i4,' Rev comm loop',i4,' with IDO =',i3)
-
  4907 FORMAT(/,22X,A
      &      ,/,7X,'1',12X,'2',12X,'3',12X,'4',12X,'5',12X,'6',12X,
      &        '7',12X,'8',12X,'9',12X,'10')
 
  4908 FORMAT(10(1X,1ES12.5))
 
- 4092 FORMAT(1X,I2,'/',A44,18X,2X,I2,':',I2,':',I2,'.',I3)
-
 98710 FORMAT(' dsaupd loop count = ',I4,' ido = ',i4,', "type" = ',I3,
      &       ', using ',a,' LAPACK matrices',/)
 
 99990 FORMAT('**********************************************************
      &***************************')
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
+
 
       RETURN
 
@@ -1197,8 +1175,7 @@ c
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE SCONTR, ONLY                :  PROG_NAME, FATAL_ERR, WARN_ERR
-      USE IOUNT1, ONLY                :  WRT_BUG, WRT_ERR, WRT_LOG, ERR,
-     &                                   F04, F06
+      USE IOUNT1, ONLY                :  WRT_BUG, WRT_ERR, ERR, F06
 
       IMPLICIT NONE
 
@@ -1804,12 +1781,7 @@ c     %-----------------------%
 c     | Executable Statements |
 c     %-----------------------%
 c
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+1) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
 
@@ -2032,12 +2004,6 @@ c
 c
  9000 continue
 c
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+1) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
 
       RETURN
 
@@ -2361,12 +2327,6 @@ c     %-----------------------%
 c     | Executable Statements |
 c     %-----------------------%
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+1) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
 
 ! **********************************************************************************************************************************
 
@@ -2926,12 +2886,6 @@ c
 c
  9000 continue
 c
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+1) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
 
       RETURN
 
@@ -3241,12 +3195,7 @@ c     %-----------------------%
 c     | Executable Statements |
 c     %-----------------------%
 c
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+2) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
 
@@ -3929,12 +3878,6 @@ c
 c
  9000 continue
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+2) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
 
       RETURN
 
@@ -4054,12 +3997,7 @@ c     %-----------------------%
 c     | Executable Statements |
 c     %-----------------------%
 c
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+2) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
 
@@ -4172,12 +4110,6 @@ c
 c
  9000 continue
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+2) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
 
       RETURN
 
@@ -4341,12 +4273,7 @@ c     %-----------------------%
 c     | Executable Statements |
 c     %-----------------------%
 c
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+3) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
 
@@ -4419,12 +4346,6 @@ c
      &        '_sgets: Associated Ritz estimates')
       end if
 c
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+3) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
 
       RETURN
 
@@ -4528,12 +4449,7 @@ c     %-----------------------%
 c     | Executable Statements |
 c     %-----------------------%
 c
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+3) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
 
@@ -4662,12 +4578,6 @@ c
 c
  9000 continue
 c
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+3) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
 
       RETURN
 
@@ -4703,12 +4613,7 @@ c     %-----------------------%
 c     | Executable Statements |
 c     %-----------------------%
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+2) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
 
@@ -4735,12 +4640,6 @@ c     %----------------------------------------------------%
       tmvopx = 0.0D+0
       tmvbx  = 0.0D+0
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+2) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
 
       RETURN
 
@@ -4954,12 +4853,7 @@ c     %-----------------------%
 c     | Executable Statements |
 c     %-----------------------%
 c
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+3) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
 c
@@ -5183,12 +5077,6 @@ c
 c
  9000 continue
 c
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+3) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
 
       RETURN
 
@@ -5494,12 +5382,7 @@ c     %-----------------------%
 c     | Executable Statements |
 c     %-----------------------%
 c
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+3) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
 
@@ -6071,12 +5954,6 @@ c     %---------------------------------------------------------------%
 c
  9000 continue
 c
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+3) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
 
       RETURN
 
@@ -6298,12 +6175,7 @@ c     %-----------------------%
 c     | Executable Statements |
 c     %-----------------------%
 c
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+3) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
 
@@ -6616,12 +6488,6 @@ c
 c
  9000 continue
 c
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+3) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
 
       RETURN
 
@@ -6745,12 +6611,7 @@ c     %-----------------------%
 c     | Executable Statements |
 c     %-----------------------%
 c
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+3) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
 
@@ -6777,12 +6638,6 @@ c
       call cpu_time (t1)
       tsconv = tsconv + (t1 - t0)
 c
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+3) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
 
       RETURN
 
@@ -6935,12 +6790,7 @@ c     %-----------------------%
 c     | Executable Statements |
 c     %-----------------------%
 c
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+3) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
 
@@ -6984,12 +6834,6 @@ c
 c
  9000 continue
 c
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+3) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
 
       RETURN
 
@@ -7160,12 +7004,7 @@ c     .. intrinsic functions ..
 c     ..
 c     .. executable statements ..
 c
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+4) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
 
@@ -7607,12 +7446,6 @@ c           *************************************
 c
   190 continue
 c
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND+4) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
 
       RETURN
 

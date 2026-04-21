@@ -3,11 +3,10 @@
       DOUBLE PRECISION FUNCTION DLAMCH( CMACH )
 
       USE PENTIUM_II_KIND, ONLY         :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                  :  ERR, F04, F06, SC1, WRT_LOG
+      USE IOUNT1, ONLY                  :  ERR, F06, SC1
       USE SCONTR, ONLY                  :  BLNK_SUB_NAM, FATAL_ERR
       USE TIMDAT, ONLY                  :  HOUR, MINUTE, SEC,
      &                                     SFRAC, TSEC
-      USE SUBR_BEGEND_LEVELS, ONLY      :  LAPACK_BEGEND
       USE LAPACK_BLAS_AUX
 
       USE OUTA_HERE_Interface

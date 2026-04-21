@@ -24,19 +24,17 @@
 
 ! End MIT license text.
 
-      SUBROUTINE WRITE_BAR (NUM, FILL_F06, FILL_ANS, ISUBCASE, ITABLE,  &
+      SUBROUTINE WRITE_BAR (NUM, FILL_F06, ISUBCASE, ITABLE,            &
                             TITLE, SUBTITLE, LABEL,                     &
-                            FIELD5_INT_MODE, FIELD6_EIGENVALUE )
+                            FIELD5_INT_MODE, FIELD6_EIGENVALUE, WRITE_F06 )
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_ERR, WRT_LOG, ANS, ERR, F04, F06, OP2
+      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, OP2
       USE SCONTR, ONLY                :  BARTOR, BLNK_SUB_NAM, MOGEL
       USE TIMDAT, ONLY                :  TSEC
-      USE SUBR_BEGEND_LEVELS, ONLY    :  WRITE_BAR_BEGEND
       USE CONSTANTS_1, ONLY           :  ZERO
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE LINK9_STUFF, ONLY           :  EID_OUT_ARRAY, MAXREQ, MSPRNT, OGEL
-      USE PARAMS, ONLY                :  PRTANS
 
       USE WRITE_BAR_USE_IFs
 
@@ -45,13 +43,13 @@
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'WRITE_BAR'
 
       CHARACTER(LEN=*), INTENT(IN)    :: FILL_F06          ! Padding for output format
-      CHARACTER(LEN=*), INTENT(IN)    :: FILL_ANS          ! Padding for output format
       INTEGER(LONG), INTENT(IN)       :: ITABLE            ! the current op2 subtable, should be -3, -5, ...
       CHARACTER(LEN=128), INTENT(IN)  :: TITLE             ! the model TITLE
       CHARACTER(LEN=128), INTENT(IN)  :: SUBTITLE          ! the subcase SUBTITLE
       CHARACTER(LEN=128), INTENT(IN)  :: LABEL             ! the subcase LABEL
       INTEGER(LONG), INTENT(IN)       :: FIELD5_INT_MODE
       REAL(DOUBLE),  INTENT(IN)       :: FIELD6_EIGENVALUE
+      LOGICAL,       INTENT(IN)       :: WRITE_F06
 
       CHARACTER(133*BYTE)             :: BLINE1A           ! Result of concatenating char. variables BOUT1, BMS1, BMSF1, BTOR to
 !                                                            make the 1st line of stress output for a CBAR with torsional stress
@@ -81,7 +79,7 @@
       INTEGER(LONG), INTENT(IN)       :: NUM               ! The number of rows of OGEL to write out
       INTEGER(LONG)                   :: I,J               ! DO loop indices
       INTEGER(LONG)                   :: K                 ! Counter
-      INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = WRITE_BAR_BEGEND
+
 
       REAL(DOUBLE)                    :: ABS_ANS(16)       ! Max ABS for all grids output for each of the 6 disp components
       REAL(DOUBLE)                    :: MAX_ANS(16)       ! Max for all grids output for each of the 6 disp components
@@ -94,16 +92,11 @@
       INTEGER(LONG)                   :: NVALUES           ! number of values in the op2 block
       STRESS_CODE = 1
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
-      ! Routine for writing output to text files F06 and ANS for BAR element stresses. Up to 2 elements written per line of output.
-      ! Data is first written to character variables and then that character variable is output the F06 and ANS.
+      ! Routine for writing output to text file F06 for BAR element stresses. Up to 2 elements written per line of output.
+      ! Data is first written to character variables and then that character variable is output the F06.
       ! op2_headers = ['s1a', 's2a', 's3a', 's4a', 'axial', 'smaxa', 'smina', 'MS_tension',
       !                's1b', 's2b', 's3b', 's4b',          'smaxb', 'sminb', 'MS_compression']
 
@@ -190,47 +183,29 @@
          ENDIF
 
          ! Write the two lines of stress output for one element to F06
-         WRITE(F06,*)
-         IF (PRTANS == 'Y') WRITE(ANS,*)
+         IF (WRITE_F06) WRITE(F06,*)
          IF (BARTOR == 'Y') THEN
             BLINE1A = BOUT1//BMS1//BMSF1//BTOR
             BLINE2A = BOUT2//BMS2//BMSF2//BMS3//BMSF3
-            WRITE(F06,9031) BLINE1A
-            WRITE(F06,9031) BLINE2A
-            IF (PRTANS == 'Y') THEN
-               WRITE(ANS,9901) FILL_ANS, EID_OUT_ARRAY(I,1), (OGEL(K-1,J),J=1,9)
-               WRITE(ANS,9902) FILL_ANS, (OGEL(K,J),J=1,9)
-            ENDIF
+            IF (WRITE_F06) WRITE(F06,9031) BLINE1A
+            IF (WRITE_F06) WRITE(F06,9031) BLINE2A
          ELSE
             BLINE1B = BOUT1//BMS1//BMSF1
             BLINE2B = BOUT2//BMS2//BMSF2
-            WRITE(F06,9031) BLINE1B
-            WRITE(F06,9031) BLINE2B
-            IF (PRTANS == 'Y') THEN
-               WRITE(ANS,9903) FILL_ANS, EID_OUT_ARRAY(I,1), (OGEL(K-1,J),J=1,8)
-               WRITE(ANS,9904) FILL_ANS, (OGEL(K,J),J=1,8)
-           ENDIF
-         ENDIF
-
-         IF (PRTANS == 'Y') THEN
+            IF (WRITE_F06) WRITE(F06,9031) BLINE1B
+            IF (WRITE_F06) WRITE(F06,9031) BLINE2B
          ENDIF
 
       ENDDO
 
       CALL GET_MAX_MIN_ABS ( 1, 8 )
-      WRITE(F06,9108) (MAX_ANS_CHAR(J),J=1,7), MAX_ANS(8), (MAX_ANS_CHAR(J),J=9,15), MAX_ANS(16),                                  &
-                      (MIN_ANS_CHAR(J),J=1,7), MIN_ANS(8), (MIN_ANS_CHAR(J),J=9,15), MIN_ANS(16),                                  &
-                      (ABS_ANS_CHAR(J),J=1,7), ABS_ANS(8), (ABS_ANS_CHAR(J),J=9,15), ABS_ANS(16)
-      IF (PRTANS == 'Y') THEN
-         WRITE(ANS,9118) (MAX_ANS(J),J=1,16),(MIN_ANS(J),J=1,16), (ABS_ANS(J),J=1,16)
+      IF (WRITE_F06) THEN
+         WRITE(F06,9108) (MAX_ANS_CHAR(J),J=1,7), MAX_ANS(8), (MAX_ANS_CHAR(J),J=9,15), MAX_ANS(16),                               &
+                         (MIN_ANS_CHAR(J),J=1,7), MIN_ANS(8), (MIN_ANS_CHAR(J),J=9,15), MIN_ANS(16),                               &
+                         (ABS_ANS_CHAR(J),J=1,7), ABS_ANS(8), (ABS_ANS_CHAR(J),J=9,15), ABS_ANS(16)
       ENDIF
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
+
 
       RETURN
 
@@ -253,16 +228,6 @@
 
  9041 FORMAT(ES14.6)
 
- 9901 FORMAT(A,I8,7(1ES14.6),4X,1ES10.2,2ES14.6)
-
- 9902 FORMAT(A,8X,7(1ES14.6),4X,1ES10.2,2ES14.6)
-
- 9903 FORMAT(A,I8,7(1ES14.6),4X,1ES10.2,1ES14.6)
-
- 9904 FORMAT(A,8X,7(1ES14.6),4X,1ES10.2,1ES14.6)
-
-
-
  9108 FORMAT( 1X,'         ------------- ------------- ------------- ------------- ------------- ------------- -------------',     &
                         ' ---------',/,                                                                                            &
              1X,'MAX* :  ',7A,1ES10.2,/,                                                                                           &
@@ -272,15 +237,6 @@
              1X,'ABS* :  ',7A,1ES10.2,/,                                                                                           &
              1X,'ABS* :  ',7A,1ES10.2,/,                                                                                           &
              1X,'*for output set')
-
- 9118 FORMAT(11X,'              ------------- ------------- ------------- ------------- ------------- ------------- -------------',&
-                             ' ---------',/,                                                                                       &
-             1X,'MAX (for output set):  ',7(1ES14.6),ES14.2,/,                                                                     &
-             1X,'MAX (for output set):  ',7(1ES14.6),ES14.2,//,                                                                    &
-             1X,'MIN (for output set):  ',7(1ES14.6),ES14.2,/,                                                                     &
-             1X,'MIN (for output set):  ',7(1ES14.6),ES14.2,//,                                                                    &
-             1X,'ABS (for output set):  ',7(1ES14.6),ES14.2,/,                                                                     &
-             1X,'ABS (for output set):  ',7(1ES14.6),ES14.2)
 
 ! **********************************************************************************************************************************
 

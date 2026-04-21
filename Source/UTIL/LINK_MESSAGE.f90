@@ -1,4 +1,4 @@
-! ###############################################################################################################################
+! ##################################################################################################################################
 ! Begin MIT license text.                                                                                    
 ! _______________________________________________________________________________________________________
                                                                                                          
@@ -23,33 +23,68 @@
 ! _______________________________________________________________________________________________________
                                                                                                         
 ! End MIT license text.                                                                                      
-
-   MODULE WRITE_MEM_SUM_TO_F04_Interface
-
-   INTERFACE
-
-      SUBROUTINE WRITE_MEM_SUM_TO_F04 ( NAME, WHAT, MB_MEM, NROWS, NCOLS, SUBR_BEGEND )
-
-
-      USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_LOG, F04
-      USE SCONTR, ONLY                :  TOT_MB_MEM_ALLOC
-      USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-
-      IMPLICIT NONE
  
-      CHARACTER(LEN=*), INTENT(IN)    :: NAME              ! Array name that has MB_ALLOCATED mem allocated
-      CHARACTER(LEN=*), INTENT(IN)    :: WHAT              ! Whether to write allocated or deallocated memory
+      SUBROUTINE LINK_MESSAGE(MODNAM)
+ 
+      USE IOUNT1, ONLY                :  SC1
+      USE SCONTR, ONLY                :  LINKNO
+      USE TIMDAT, ONLY                :  HOUR, MINUTE, SEC, SFRAC
 
-      INTEGER(LONG)   , INTENT(IN)    :: NCOLS             ! Number of cols for matrix NAME
-      INTEGER(LONG)   , INTENT(IN)    :: NROWS             ! Number of rows for matrix NAME
-      INTEGER(LONG)   , INTENT(IN)    :: SUBR_BEGEND       ! SUBR_BEGEND value from calling subr
+      USE OURTIM_Interface
+      
+      IMPLICIT NONE
 
-      REAL(DOUBLE)    , INTENT(IN)    :: MB_MEM            ! Megabytes of mmemory allocated to array NAME
+      CHARACTER(LEN=*), INTENT(IN)    :: MODNAM            ! Name to write to screen to describe module being run
 
-      END SUBROUTINE WRITE_MEM_SUM_TO_F04
+! **********************************************************************************************************************************
 
-   END INTERFACE
+      CALL OURTIM
 
-   END MODULE WRITE_MEM_SUM_TO_F04_Interface
+      WRITE(SC1,1096) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
 
+      RETURN
+
+! **********************************************************************************************************************************
+
+ 1096 FORMAT(1X,I2,'/',A,T69,I2,':',I2,':',I2,'.',I3)
+
+
+      END SUBROUTINE LINK_MESSAGE
+
+
+
+
+
+
+
+
+
+      SUBROUTINE LINK_MESSAGE_I(MODNAM, I)
+ 
+      USE PENTIUM_II_KIND, ONLY       :  LONG
+      USE IOUNT1, ONLY                :  SC1
+      USE SCONTR, ONLY                :  LINKNO
+      USE TIMDAT, ONLY                :  HOUR, MINUTE, SEC, SFRAC
+
+      USE OURTIM_Interface
+      
+      IMPLICIT NONE
+
+      CHARACTER(LEN=*), INTENT(IN)    :: MODNAM            ! Name to write to screen to describe module being run
+      INTEGER(LONG), INTENT(IN)       :: I                 ! A number displayed after the string
+
+
+! **********************************************************************************************************************************
+
+      CALL OURTIM
+
+      WRITE(SC1,1097) LINKNO,MODNAM,I,HOUR,MINUTE,SEC,SFRAC
+
+      RETURN
+
+! **********************************************************************************************************************************
+
+ 1097 FORMAT(1X,I2,'/',A,T59,I8,2X,I2,':',I2,':',I2,'.',I3)
+
+
+      END SUBROUTINE LINK_MESSAGE_I

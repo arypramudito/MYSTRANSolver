@@ -29,14 +29,13 @@
       ! Processes SPC and MPC force output requests for 1 subcase.
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_ERR, WRT_LOG, ERR, F04, F06, OT4
+      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, OT4
 
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, GROUT_SPCF_BIT, GROUT_MPCF_BIT, GROUT_GPFO_BIT, IBIT, INT_SC_NUM,&
                                          MELGP, MOGEL, NGRID, NDOFF, NDOFG, NDOFM, NDOFN, NDOFS, NDOFSA, NTERM_GMN,                &
                                          NTERM_HMN, NTERM_KFS, NTERM_KFSD, NTERM_LMN, NTERM_MFS, NTERM_QS, SOL_NAME
 
       USE TIMDAT, ONLY                :  TSEC
-      USE SUBR_BEGEND_LEVELS, ONLY    :  OFP2_BEGEND
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
       USE DOF_TABLES, ONLY            :  TDOF, TDOF_ROW_START, TDOFI
       USE EIGEN_MATRICES_1, ONLY      :  EIGEN_VAL, GEN_MASS, MEFFMASS, MPFACTOR_N6
@@ -60,7 +59,7 @@
 
       IMPLICIT NONE
 
-      LOGICAL                         :: WRITE_F06, WRITE_OP2, WRITE_PCH, WRITE_ANS   ! flag
+      LOGICAL                         :: WRITE_F06, WRITE_OP2, WRITE_PCH   ! flag
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'OFP2'
       CHARACTER(LEN=*) , INTENT(IN)   :: WHAT              ! Indicator of whether to process output requests for SPC or MPC forces
       CHARACTER(LEN=*) , INTENT(IN)   :: ZERO_GEN_STIFF    ! Indicator of whether there are zero gen stiffs (can't calc MEFFMASS)
@@ -104,7 +103,7 @@
       INTEGER(LONG)                   :: ROW_NUM_START     ! DOF number where TDOF data begins for a grid
       INTEGER(LONG)                   :: SDOF              ! S-set DOF number
       INTEGER(LONG)                   :: SADOF             ! SA-set DOF number
-      INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = OFP2_BEGEND
+
       INTEGER(LONG)                   :: TDOF_ROW          ! Row no. in array TDOF to find GDOF DOF number
 
       REAL(DOUBLE)                    :: DEN               ! Intermediate variable
@@ -124,12 +123,7 @@
  9000 FORMAT(' *DEBUG:    RUNNING=', A)
  9003 FORMAT(' *DEBUG:    ITABLE BAD=', i4)
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
       WRITE_NEU = (PRTNEU == 'Y')
 
 ! **********************************************************************************************************************************
@@ -179,10 +173,8 @@
             ENDDO
          ENDIF
 
-         DO I=1,NDOFS
-            QSK_COL = ZERO
-            QSM_COL = ZERO
-         ENDDO
+         QSK_COL = ZERO
+         QSM_COL = ZERO
 
          IF ((SOL_NAME(1:8) == 'BUCKLING') .AND. (LOAD_ISTEP == 2)) THEN
             IF (NTERM_KFSD > 0) THEN                          ! Calc QSK = KSFD*UF 
@@ -246,7 +238,7 @@
 !xx            CALL CALC_TDOF_ROW_NUM ( GRID_ID(I), ROW_NUM_START, 'N' )
                CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, GRID_ID(I), IGRID )
                ROW_NUM_START = TDOF_ROW_START(IGRID)
-               CALL GET_GRID_NUM_COMPS ( GRID_ID(I), NUM_COMPS, SUBR_NAME )
+               CALL GET_GRID_NUM_COMPS ( I, NUM_COMPS, SUBR_NAME )
 
 !xx            WRITE_OGEL(NUM) = 'N'                       ! Set WRITE_OGEL to 'Y' for all grids that have a component in S-set
 !xx            DO J=1,NUM_COMPS
@@ -342,7 +334,7 @@
                   ENDDO
                   K = 0
                   DO I=1,NGRID
-                     CALL GET_GRID_NUM_COMPS ( GRID_ID(I), NUM_COMPS, SUBR_NAME )
+                     CALL GET_GRID_NUM_COMPS ( I, NUM_COMPS, SUBR_NAME )
                      DO J=1,NUM_COMPS
                         K = K + 1
                         QGs_MEFM_SUM(J) = QGs_MEFM_SUM(J) + QGs_MEFM(K)
@@ -380,7 +372,7 @@
 !xx            CALL CALC_TDOF_ROW_NUM ( GRID_ID(I), ROW_NUM_START, 'N' )
                CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, GRID_ID(I), IGRID )
                ROW_NUM_START = TDOF_ROW_START(IGRID)
-               CALL GET_GRID_NUM_COMPS ( GRID_ID(I), NUM_COMPS, SUBR_NAME )
+               CALL GET_GRID_NUM_COMPS ( I, NUM_COMPS, SUBR_NAME )
                DO J=1,NUM_COMPS
                   CALL TDOF_COL_NUM ( 'S' , S_SET_COL )
                   CALL TDOF_COL_NUM ( 'SA', SA_SET_COL )
@@ -557,7 +549,7 @@
 !xx            CALL CALC_TDOF_ROW_NUM ( GRID_ID(I), ROW_NUM_START, 'N' )
                CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, GRID_ID(I), IGRID )
                ROW_NUM_START = TDOF_ROW_START(IGRID)
-               CALL GET_GRID_NUM_COMPS ( GRID_ID(I), NUM_COMPS, SUBR_NAME )
+               CALL GET_GRID_NUM_COMPS ( I, NUM_COMPS, SUBR_NAME )
                DO J=1,NUM_COMPS
                   CALL TDOF_COL_NUM ( 'G ', G_SET_COL )
                   TDOF_ROW = ROW_NUM_START + J - 1
@@ -635,12 +627,7 @@
 
       ENDIF
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
+
 
       RETURN
 
@@ -659,12 +646,6 @@
 
  9100 FORMAT(' *ERROR  9100: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
                     ,/,14X,' ILLEGAL INPUT FOR VARIABLE "WHAT" = ',A)
-
- 9111 FORMAT(10X,'             -------------- -------------- -------------- -------------- -------------- --------------',/,       &
-             1X,'ABS AUTOSPC FORCES  :',6(ES15.6))
-
- 9113 FORMAT(10X,'             -------------- -------------- -------------- -------------- -------------- --------------',/,       &
-             1X,'AUTOSPC FORCE TOTALS:',6(ES15.6),/,5X,'(for output set)')
 
  9121 FORMAT(1X,'ABS AUTOSPC FORCES  :',6(ES15.6))
 

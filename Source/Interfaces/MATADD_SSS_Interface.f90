@@ -28,25 +28,20 @@
 
    INTERFACE
 
-      SUBROUTINE MATADD_SSS ( NROWS, MAT_A_NAME, NTERM_A, I_A, J_A, A, ALPHA, MAT_B_NAME, NTERM_B, I_B, J_B, B, BETA,  &
-
+      SUBROUTINE MATADD_SSS ( NROWS, MAT_A_NAME, NTERM_A, I_A, J_A, A, ALPHA,  &
+                                     MAT_B_NAME, NTERM_B, I_B, J_B, B, BETA,   &
                                      MAT_C_NAME, NTERM_C, I_C, J_C, C )
  
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_ERR, WRT_LOG, ERR, F04, F06
+      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR
       USE TIMDAT, ONLY                :  TSEC
-      USE CONSTANTS_1, ONLY           :  ZERO
-      USE DEBUG_PARAMETERS, ONLY      :  DEBUG
-      USE SPARSE_ALG_ARRAYS, ONLY     :  LOGICAL_VEC, REAL_VEC
-      USE SUBR_BEGEND_LEVELS, ONLY    :  MATADD_SSS_BEGEND
  
       IMPLICIT NONE
  
       CHARACTER(LEN=*), INTENT(IN)    :: MAT_A_NAME        ! Name of matrix A
       CHARACTER(LEN=*), INTENT(IN)    :: MAT_B_NAME        ! Name of matrix B
       CHARACTER(LEN=*), INTENT(IN)    :: MAT_C_NAME        ! Name of matrix C
-      CHARACTER( 2*BYTE)              :: ALG               ! Which algorithm is used in solving for the terms in a row of C
 
       INTEGER(LONG), INTENT(IN )      :: NROWS             ! Number of rows in input matrices A and B
       INTEGER(LONG), INTENT(IN )      :: NTERM_A           ! Number of nonzero terms in input matrix A
@@ -58,7 +53,7 @@
       INTEGER(LONG), INTENT(IN )      :: J_B(NTERM_B)      ! Col no's for nonzero terms in matrix B
       INTEGER(LONG), INTENT(OUT)      :: I_C(NROWS+1)      ! I_C(I+1) - I_C(I) = no. terms in row I of matrix C
       INTEGER(LONG), INTENT(OUT)      :: J_C(NTERM_C)      ! Col no's for nonzero terms in matrix C
-      INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = MATADD_SSS_BEGEND
+
        
       REAL(DOUBLE) , INTENT(IN )      :: A(NTERM_A)        ! Nonzero terms in matrix A
       REAL(DOUBLE) , INTENT(IN )      :: B(NTERM_B)        ! Nonzero terms in matrix B

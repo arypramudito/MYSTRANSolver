@@ -62,13 +62,12 @@
 
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_ERR, WRT_LOG, ERR, F04, F06, SC1
+      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, SC1
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, LDOFG, MTDOF, NDOFA, NDOFF, NDOFG, NDOFL, NDOFM, NDOFN, NDOFO,   &
                                          NDOFR, NDOFS, NDOFSA, NDOFSB, NDOFSE, NDOFSG, NDOFSZ, NGRID, NUM_USET_U1, NUM_USET_U2,    &
                                          SOL_NAME, WARN_ERR
       USE PARAMS, ONLY                :  EIGESTL, PRTDOF
       USE TIMDAT, ONLY                :  TSEC
-      USE SUBR_BEGEND_LEVELS, ONLY    :  DOF_PROC_BEGEND
       USE DOF_TABLES, ONLY            :  TSET, TDOF, TDOFI, TDOF_ROW_START, USET
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
       USE MODEL_STUF, ONLY            :  EIG_N2, GRID, GRID_ID, GRID_SEQ, INV_GRID_SEQ
@@ -105,14 +104,9 @@
       INTEGER(LONG)                   :: IGRID             ! Internal grid number
       INTEGER(LONG)                   :: IROW              ! Row number in array TDOF or TDOFI
       INTEGER(LONG)                   :: NUM_COMPS         ! Number of displ components (1 for SPOINT, 6 for physical grid)
-      INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = DOF_PROC_BEGEND
+
  
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
       WRITE(SC1, * ) '     TDOF PROC'
@@ -150,7 +144,7 @@
       IROW = 0
       CALL COUNTER_INIT('       Process col 1-4 of TDOF', NGRID)
       DO I = 1,NGRID
-         CALL GET_GRID_NUM_COMPS ( GRID_ID(INV_GRID_SEQ(I)), NUM_COMPS, SUBR_NAME )
+         CALL GET_GRID_NUM_COMPS ( INV_GRID_SEQ(I), NUM_COMPS, SUBR_NAME )
          DO J = 1,NUM_COMPS
             IROW = IROW + 1
             TDOF(IROW,1) = GRID_ID(I)
@@ -168,7 +162,7 @@
 
       DO I=1,NGRID
          IGRID = INV_GRID_SEQ(I)
-         CALL GET_GRID_NUM_COMPS ( GRID_ID(INV_GRID_SEQ(I)), NUM_COMPS, SUBR_NAME )
+         CALL GET_GRID_NUM_COMPS ( INV_GRID_SEQ(I), NUM_COMPS, SUBR_NAME )
          DO J=1,NUM_COMPS
             IROW = TDOF_ROW_START(IGRID) + J - 1
             NDOFG = NDOFG + 1
@@ -194,7 +188,7 @@
          CALL COUNTER_INIT('       Process M -set         ', NGRID)
          DO I=1,NGRID
             IGRID = INV_GRID_SEQ(I)
-            CALL GET_GRID_NUM_COMPS ( GRID_ID(INV_GRID_SEQ(I)), NUM_COMPS, SUBR_NAME )
+            CALL GET_GRID_NUM_COMPS ( INV_GRID_SEQ(I), NUM_COMPS, SUBR_NAME )
             DO J=1,NUM_COMPS
                IF (TSET(IGRID,J) == 'M ') THEN
                   IROW = TDOF_ROW_START(IGRID) + J - 1
@@ -213,7 +207,7 @@
          CALL COUNTER_INIT('       Process SA-set         ', NGRID)
          DO I=1,NGRID
             IGRID = INV_GRID_SEQ(I)
-            CALL GET_GRID_NUM_COMPS ( GRID_ID(INV_GRID_SEQ(I)), NUM_COMPS, SUBR_NAME )
+            CALL GET_GRID_NUM_COMPS ( INV_GRID_SEQ(I), NUM_COMPS, SUBR_NAME )
             DO J=1,NUM_COMPS
                IF (TSET(IGRID,J) == 'SA') THEN
                   IROW = TDOF_ROW_START(IGRID) + J - 1
@@ -232,7 +226,7 @@
          CALL COUNTER_INIT('       Process SB-set         ', NGRID)
          DO I=1,NGRID
             IGRID = INV_GRID_SEQ(I)
-            CALL GET_GRID_NUM_COMPS ( GRID_ID(INV_GRID_SEQ(I)), NUM_COMPS, SUBR_NAME )
+            CALL GET_GRID_NUM_COMPS ( INV_GRID_SEQ(I), NUM_COMPS, SUBR_NAME )
             DO J=1,NUM_COMPS
                IF (TSET(IGRID,J) == 'SB') THEN
                   IROW = TDOF_ROW_START(IGRID) + J - 1
@@ -251,7 +245,7 @@
          CALL COUNTER_INIT('       Process SG-set         ', NGRID)
          DO I=1,NGRID
             IGRID = INV_GRID_SEQ(I)
-            CALL GET_GRID_NUM_COMPS ( GRID_ID(INV_GRID_SEQ(I)), NUM_COMPS, SUBR_NAME )
+            CALL GET_GRID_NUM_COMPS ( INV_GRID_SEQ(I), NUM_COMPS, SUBR_NAME )
             DO J=1,NUM_COMPS
                IF (TSET(IGRID,J) == 'SG') THEN
                   IROW = TDOF_ROW_START(IGRID) + J - 1
@@ -270,7 +264,7 @@
          CALL COUNTER_INIT('       Process SE-set         ', NGRID)
          DO I=1,NGRID
             IGRID = INV_GRID_SEQ(I)
-            CALL GET_GRID_NUM_COMPS ( GRID_ID(INV_GRID_SEQ(I)), NUM_COMPS, SUBR_NAME )
+            CALL GET_GRID_NUM_COMPS ( INV_GRID_SEQ(I), NUM_COMPS, SUBR_NAME )
             DO J=1,NUM_COMPS
                IF (TSET(IGRID,J) == 'SE') THEN
                   IROW = TDOF_ROW_START(IGRID) + J - 1
@@ -289,7 +283,7 @@
          CALL COUNTER_INIT('       Process O -set         ', NGRID)
          DO I=1,NGRID
             IGRID = INV_GRID_SEQ(I)
-            CALL GET_GRID_NUM_COMPS ( GRID_ID(INV_GRID_SEQ(I)), NUM_COMPS, SUBR_NAME )
+            CALL GET_GRID_NUM_COMPS ( INV_GRID_SEQ(I), NUM_COMPS, SUBR_NAME )
             DO J=1,NUM_COMPS
                IF (TSET(IGRID,J) == 'O ') THEN
                   IROW = TDOF_ROW_START(IGRID) + J - 1
@@ -308,7 +302,7 @@
          CALL COUNTER_INIT('       Process R -set         ', NGRID)
          DO I=1,NGRID
             IGRID = INV_GRID_SEQ(I)
-            CALL GET_GRID_NUM_COMPS ( GRID_ID(INV_GRID_SEQ(I)), NUM_COMPS, SUBR_NAME )
+            CALL GET_GRID_NUM_COMPS ( INV_GRID_SEQ(I), NUM_COMPS, SUBR_NAME )
             DO J=1,NUM_COMPS
                IF (TSET(IGRID,J) == 'R ') THEN
                   IROW = TDOF_ROW_START(IGRID) + J - 1
@@ -326,7 +320,7 @@
       CALL COUNTER_INIT('       Process N -set         ', NGRID)
       DO I=1,NGRID
          IGRID = INV_GRID_SEQ(I)
-         CALL GET_GRID_NUM_COMPS ( GRID_ID(INV_GRID_SEQ(I)), NUM_COMPS, SUBR_NAME )
+         CALL GET_GRID_NUM_COMPS ( INV_GRID_SEQ(I), NUM_COMPS, SUBR_NAME )
          DO J=1,NUM_COMPS
             IROW  = TDOF_ROW_START(IGRID) + J - 1
             IF ((TDOF(IROW,G_SET_COL) > 0) .AND. (TDOF(IROW,M_SET_COL) == 0)) THEN
@@ -346,7 +340,7 @@
          CALL COUNTER_INIT('       Process SZ-set         ', NGRID)
          DO I=1,NGRID
             IGRID = INV_GRID_SEQ(I)
-            CALL GET_GRID_NUM_COMPS ( GRID_ID(INV_GRID_SEQ(I)), NUM_COMPS, SUBR_NAME )
+            CALL GET_GRID_NUM_COMPS ( INV_GRID_SEQ(I), NUM_COMPS, SUBR_NAME )
             DO J=1,NUM_COMPS
                IROW  = TDOF_ROW_START(IGRID) + J - 1
                IF ((TDOF(IROW,SA_SET_COL) > 0) .OR. (TDOF(IROW,SB_SET_COL) > 0) .OR. (TDOF(IROW,SG_SET_COL) > 0)) THEN
@@ -367,7 +361,7 @@
          CALL COUNTER_INIT('       Process S -set         ', NGRID)
          DO I=1,NGRID
             IGRID = INV_GRID_SEQ(I)
-            CALL GET_GRID_NUM_COMPS ( GRID_ID(INV_GRID_SEQ(I)), NUM_COMPS, SUBR_NAME )
+            CALL GET_GRID_NUM_COMPS ( INV_GRID_SEQ(I), NUM_COMPS, SUBR_NAME )
             DO J=1,NUM_COMPS
                IROW  = TDOF_ROW_START(IGRID) + J - 1
                IF ((TDOF(IROW,SZ_SET_COL) > 0) .OR. (TDOF(IROW,SE_SET_COL) > 0)) THEN
@@ -387,7 +381,7 @@
       CALL COUNTER_INIT('       Process F -set         ', NGRID)
       DO I=1,NGRID
          IGRID = INV_GRID_SEQ(I)
-         CALL GET_GRID_NUM_COMPS ( GRID_ID(INV_GRID_SEQ(I)), NUM_COMPS, SUBR_NAME )
+         CALL GET_GRID_NUM_COMPS ( INV_GRID_SEQ(I), NUM_COMPS, SUBR_NAME )
          DO J=1,NUM_COMPS
             IROW  = TDOF_ROW_START(IGRID) + J - 1
             IF ((TDOF(IROW,N_SET_COL) > 0) .AND. (TDOF(IROW,S_SET_COL) == 0)) THEN
@@ -406,7 +400,7 @@
       CALL COUNTER_INIT('       Process A -set         ', NGRID)
       DO I=1,NGRID
          IGRID = INV_GRID_SEQ(I)
-         CALL GET_GRID_NUM_COMPS ( GRID_ID(INV_GRID_SEQ(I)), NUM_COMPS, SUBR_NAME )
+         CALL GET_GRID_NUM_COMPS ( INV_GRID_SEQ(I), NUM_COMPS, SUBR_NAME )
          DO J=1,NUM_COMPS
             IROW  = TDOF_ROW_START(IGRID) + J - 1
             IF ((TDOF(IROW,F_SET_COL) > 0) .AND. (TDOF(IROW,O_SET_COL) == 0)) THEN
@@ -425,7 +419,7 @@
       CALL COUNTER_INIT('       Process L -set         ', NGRID)
       DO I=1,NGRID
          IGRID = INV_GRID_SEQ(I)
-         CALL GET_GRID_NUM_COMPS ( GRID_ID(INV_GRID_SEQ(I)), NUM_COMPS, SUBR_NAME )
+         CALL GET_GRID_NUM_COMPS ( INV_GRID_SEQ(I), NUM_COMPS, SUBR_NAME )
          DO J=1,NUM_COMPS
             IROW  = TDOF_ROW_START(IGRID) + J - 1
             IF ((TDOF(IROW,A_SET_COL) > 0) .AND. (TDOF(IROW,R_SET_COL) == 0)) THEN
@@ -445,7 +439,7 @@
          CALL COUNTER_INIT('       Process U1-set         ', NGRID)
          DO I=1,NGRID
             IGRID = INV_GRID_SEQ(I)
-            CALL GET_GRID_NUM_COMPS ( GRID_ID(INV_GRID_SEQ(I)), NUM_COMPS, SUBR_NAME )
+            CALL GET_GRID_NUM_COMPS ( INV_GRID_SEQ(I), NUM_COMPS, SUBR_NAME )
             DO J=1,NUM_COMPS
                IF (USET(IGRID,J) == 'U1') THEN
                   IROW = TDOF_ROW_START(IGRID) + J - 1
@@ -464,7 +458,7 @@
          CALL COUNTER_INIT('       Process U2-set         ', NGRID)
          DO I=1,NGRID
             IGRID = INV_GRID_SEQ(I)
-            CALL GET_GRID_NUM_COMPS ( GRID_ID(INV_GRID_SEQ(I)), NUM_COMPS, SUBR_NAME )
+            CALL GET_GRID_NUM_COMPS ( INV_GRID_SEQ(I), NUM_COMPS, SUBR_NAME )
             DO J=1,NUM_COMPS
                IF (USET(IGRID,J) == 'U2') THEN
                   IROW = TDOF_ROW_START(IGRID) + J - 1
@@ -533,12 +527,7 @@
 !xx   WRITE(SC1, * )                                       ! Advance 1 line for screen messages         
       WRITE(SC1,*) CR13
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
+
 
       RETURN
 

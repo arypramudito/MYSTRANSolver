@@ -29,13 +29,12 @@
 ! Processes grid point accel, displ and applied force output requests for one subcase.
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_ERR, WRT_LOG, ERR, F04, F06, OT4
+      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06, OT4
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, GROUT_ACCE_BIT, GROUT_DISP_BIT, GROUT_OLOA_BIT, IBIT, INT_SC_NUM,&
                                          MELGP, MOGEL, NGRID, SOL_NAME
       USE TIMDAT, ONLY                :  TSEC
-      USE SUBR_BEGEND_LEVELS, ONLY    :  OFP1_BEGEND
       USE CONSTANTS_1, ONLY           :  ZERO
-      USE PARAMS, ONLY                :  OTMSKIP, PRTANS, PRTNEU
+      USE PARAMS, ONLY                :  OTMSKIP, PRTNEU
       USE DOF_TABLES, ONLY            :  TDOF, TDOF_ROW_START
       USE MODEL_STUF, ONLY            :  ANY_ACCE_OUTPUT, ANY_DISP_OUTPUT, ANY_OLOA_OUTPUT, GROUT, GRID, GRID_ID
       USE LINK9_STUFF, ONLY           :  GID_OUT_ARRAY, MAXREQ, OGEL
@@ -48,7 +47,7 @@
 
       IMPLICIT NONE
 
-      LOGICAL                         :: WRITE_F06, WRITE_OP2, WRITE_PCH, WRITE_ANS   ! flag
+      LOGICAL                         :: WRITE_F06, WRITE_OP2, WRITE_PCH   ! flag
       CHARACTER(LEN=LEN(BLNK_SUB_NAM)):: SUBR_NAME = 'OFP1'
       CHARACTER(LEN=*) , INTENT(IN)   :: WHAT              ! Indicator whether to process displ or force output requests
       CHARACTER( 1*BYTE)              :: ACCE_ALL_SAME_CID ! Indicator of whether all grids, for the output set, have the same
@@ -80,7 +79,7 @@
       INTEGER(LONG)                   :: NUM               ! Count of the number of rows added to array OGEL
       INTEGER(LONG)                   :: NUM_COMPS         ! Either 6 or 1 depending on whether grid is a physical grid or a SPOINT
       INTEGER(LONG)                   :: ROW_NUM_START     ! DOF number where TDOF data begins for a grid
-      INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = OFP1_BEGEND
+
       INTEGER(LONG)                   :: TDOF_ROW          ! Row no. in array TDOF to find GDOF DOF number
       LOGICAL                         :: WRITE_NEU
 
@@ -88,15 +87,9 @@
       WRITE(ERR,9000) "OFP1 - disp, accel and applied force output"
  9000 FORMAT(' *DEBUG:    RUNNING=', A)
 
-      WRITE_ANS = (PRTANS == 'Y')
       WRITE_NEU = (PRTNEU == 'Y')
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
       DO I=1,MAXREQ
@@ -154,7 +147,7 @@
 !xx            CALL CALC_TDOF_ROW_NUM ( GRID_ID(I), ROW_NUM_START, 'N' )
                CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, GRID_ID(I), IGRID )
                ROW_NUM_START = TDOF_ROW_START(IGRID)
-               CALL GET_GRID_NUM_COMPS ( GRID_ID(I), NUM_COMPS, SUBR_NAME )
+               CALL GET_GRID_NUM_COMPS ( I, NUM_COMPS, SUBR_NAME )
                DO J=1,NUM_COMPS
                   CALL TDOF_COL_NUM ( 'G ', G_SET_COL )
                   TDOF_ROW = ROW_NUM_START + J - 1
@@ -240,7 +233,7 @@
                GID_OUT_ARRAY(NUM,MELGP+1) = GRID(I,5)
                CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, GRID_ID(I), IGRID )
                ROW_NUM_START = TDOF_ROW_START(IGRID)
-               CALL GET_GRID_NUM_COMPS ( GRID_ID(I), NUM_COMPS, SUBR_NAME )
+               CALL GET_GRID_NUM_COMPS ( I, NUM_COMPS, SUBR_NAME )
                DO J=1,NUM_COMPS
                   CALL TDOF_COL_NUM ( 'G ', G_SET_COL )
                   TDOF_ROW = ROW_NUM_START + J - 1
@@ -323,7 +316,7 @@
                GID_OUT_ARRAY(NUM,MELGP+1) = GRID(I,5)
                CALL GET_ARRAY_ROW_NUM ( 'GRID_ID', SUBR_NAME, NGRID, GRID_ID, GRID_ID(I), IGRID )
                ROW_NUM_START = TDOF_ROW_START(IGRID)
-               CALL GET_GRID_NUM_COMPS ( GRID_ID(I), NUM_COMPS, SUBR_NAME )
+               CALL GET_GRID_NUM_COMPS ( I, NUM_COMPS, SUBR_NAME )
                DO J=1,NUM_COMPS
                   CALL TDOF_COL_NUM ( 'G ', G_SET_COL )
                   TDOF_ROW = ROW_NUM_START + J - 1
@@ -376,12 +369,7 @@
 
       ENDIF
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9003) SUBR_NAME,TSEC
- 9003    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
+
 
       RETURN
 

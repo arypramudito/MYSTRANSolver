@@ -37,12 +37,11 @@
  
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
       USE CONSTANTS_1, ONLY           :  ZERO, ONE
-      USE IOUNT1, ONLY                :  WRT_ERR, WRT_LOG, ERR, F04, F06
+      USE IOUNT1, ONLY                :  WRT_ERR, ERR, F06
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, FATAL_ERR, NCORD, NGRID, WARN_ERR
       USE TIMDAT, ONLY                :  TSEC
       USE DOF_TABLES, ONLY            :  TDOF, TDOFI, TDOF_ROW_START
       USE PARAMS, ONLY                :  EQCHK_REF_GRID, SUPWARN
-      USE SUBR_BEGEND_LEVELS, ONLY    :  RB_DISP_MATRIX_PROC_BEGEND
       USE MODEL_STUF, ONLY            :  CORD, GRID, RGRID, GRID_ID, INV_GRID_SEQ, MODEL_XCG, MODEL_YCG, MODEL_ZCG 
       USE RIGID_BODY_DISP_MATS, ONLY  :  RBGLOBAL_GSET
       USE DEBUG_PARAMETERS, ONLY      :  DEBUG
@@ -72,7 +71,7 @@
       INTEGER(LONG)                   :: IGRID             ! Internal grid ID
       INTEGER(LONG)                   :: NUM_COMPS         ! 6 if GRID_NUM is an physical grid, 1 if an SPOINT
       INTEGER(LONG)                   :: ROW_NUM_START     ! DOF number where TDOF data begins for a grid
-      INTEGER(LONG), PARAMETER        :: SUBR_BEGEND = RB_DISP_MATRIX_PROC_BEGEND + 1
+
  
       REAL(DOUBLE)                    :: DUM1(6,6)         ! Intermediate result in obtaining RB_GRID_GLOBL
       REAL(DOUBLE)                    :: DX0               ! X coord difference between grid I and ref grid
@@ -92,12 +91,7 @@
       REAL(DOUBLE)                    :: Y0_K              ! Basic Y coord of AGRID_I
       REAL(DOUBLE)                    :: Z0_K              ! Basic Z coord of AGRID_I
  
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9001) SUBR_NAME,TSEC
- 9001    FORMAT(1X,A,' BEGN ',F10.3)
-      ENDIF
+
 
 ! **********************************************************************************************************************************
       CALL TDOF_COL_NUM ( 'G ',  G_SET_COL )
@@ -136,7 +130,7 @@
                WRITE(F06,1408) SUBR_NAME, AGRID_R, 'GRID_ID'
                CALL OUTA_HERE ( 'Y' )
             ENDIF
-            CALL GET_GRID_NUM_COMPS ( AGRID_R, NUM_COMPS, SUBR_NAME )
+            CALL GET_GRID_NUM_COMPS ( GRID_ID_ROW_NUM_R, NUM_COMPS, SUBR_NAME )
             IF (NUM_COMPS == 6) THEN                       ! AGRID_R is a physical grid
                X0_R = RGRID(GRID_ID_ROW_NUM_R,1)
                Y0_R = RGRID(GRID_ID_ROW_NUM_R,2)
@@ -211,7 +205,7 @@
       DO K=1,NGRID
 
          AGRID_K = GRID_ID(INV_GRID_SEQ(K))
-         CALL GET_GRID_NUM_COMPS ( AGRID_K, NUM_COMPS, SUBR_NAME )
+         CALL GET_GRID_NUM_COMPS ( INV_GRID_SEQ(K), NUM_COMPS, SUBR_NAME )
 
          IF (NUM_COMPS == 6) THEN                          ! Only process physical grids. Let rows of RBGLOBAL = 0 otherwise
 
@@ -332,7 +326,7 @@
          DO I=1,NGRID
             AGRID_K = GRID_ID(INV_GRID_SEQ(I))
             AGRID = GRID_ID(INV_GRID_SEQ(I))
-            CALL GET_GRID_NUM_COMPS ( AGRID, NUM_COMPS, SUBR_NAME )
+            CALL GET_GRID_NUM_COMPS ( INV_GRID_SEQ(I), NUM_COMPS, SUBR_NAME )
             DO J=1,NUM_COMPS
                L = L + 1
                IF (J == 1) THEN
@@ -346,12 +340,7 @@
          WRITE(F06,*)
       ENDIF
 
-! **********************************************************************************************************************************
-      IF (WRT_LOG >= SUBR_BEGEND) THEN
-         CALL OURTIM
-         WRITE(F04,9002) SUBR_NAME,TSEC
- 9002    FORMAT(1X,A,' END  ',F10.3)
-      ENDIF
+
 
       RETURN
 

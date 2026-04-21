@@ -35,10 +35,9 @@
 !      memory than sparse storage for large stiffness matrices.
 
       USE PENTIUM_II_KIND, ONLY       :  BYTE, LONG, DOUBLE
-      USE IOUNT1, ONLY                :  WRT_BUG, WRT_LOG, ERR, F04, F06, L3A, SC1, LINK3A, L3A_MSG
+      USE IOUNT1, ONLY                :  WRT_BUG, ERR, F06, L3A, SC1, LINK3A, L3A_MSG
       USE SCONTR, ONLY                :  BLNK_SUB_NAM, COMM, FATAL_ERR, KLL_SDIA, LINKNO, MBUG, NDOFL, NSUB,                       &
                                          NTERM_KLL, NTERM_PL, RESTART,  SOL_NAME, WARN_ERR
-      USE TIMDAT, ONLY                :  HOUR, MINUTE, SEC, SFRAC       
       USE CONSTANTS_1, ONLY           :  ZERO, ONE, TWO, TEN
       USE PARAMS, ONLY                :  CRS_CCS, EPSERR, EPSIL, KLLRAT, RELINK3, RCONDK, SOLLIB, SUPWARN, SPARSE_FLAVOR
       USE SPARSE_MATRICES, ONLY       :  I_KLL, J_KLL, KLL, I_PL, J_PL, PL
@@ -55,6 +54,7 @@
 ! which is "USE'd" above
 
 !     USE LINK3_USE_IFs
+      USE LINK_MESSAGE_Interface
                       
       IMPLICIT NONE
  
@@ -63,7 +63,6 @@
       CHARACTER(  2*BYTE)             :: L_SET    = 'L '   ! L-set designator
       CHARACTER(  1*BYTE)             :: EQUED             ! 'Y' if the stiff matrix was equilibrated in subr EQUILIBRATE    
       CHARACTER(  1*BYTE)             :: NULL_COL          ! 'Y' if a col of KAO(transpose) is null 
-      CHARACTER( 54*BYTE)             :: MODNAM            ! Name to write to screen
  
       INTEGER(LONG)                   :: DEB_PRT(2)        ! Debug numbers to say whether to write ABAND and/or its decomp to output
 !                                                            file in called subr SYM_MAT_DECOMP_LAPACK (ABAND = band form of KLL)
@@ -127,14 +126,11 @@
 ! Write info to text files
   
       WRITE(F06,150) LINKNO
-      IF (WRT_LOG > 0) THEN
-         WRITE(F04,150) LINKNO
-      ENDIF
       WRITE(ERR,150) LINKNO
 
 ! Read LINK1A file
  
-      CALL READ_L1A ( 'KEEP', 'Y' )
+      CALL READ_L1A ( 'KEEP' )
 
 ! Check COMM for successful completion of prior LINKs
 
@@ -218,7 +214,7 @@ Factr:IF (SOLLIB == 'BANDED  ') THEN                       ! Use LAPACK
 
 ! Open file for writing displs to.
  
-      CALL FILE_OPEN ( L3A, LINK3A, OUNT, 'REPLACE', L3A_MSG, 'WRITE_STIME', 'UNFORMATTED', 'WRITE', 'REWIND', 'Y', 'N', 'Y' )
+      CALL FILE_OPEN ( L3A, LINK3A, OUNT, 'REPLACE', L3A_MSG, 'WRITE_STIME', 'UNFORMATTED', 'WRITE', 'REWIND', 'Y', 'N' )
  
 ! Loop on subcases
 
@@ -230,9 +226,8 @@ Solve:DO ISUB = 1,NSUB
          CALL ALLOCATE_COL_VEC ( 'UL_COL', NDOFL, SUBR_NAME )
          CALL ALLOCATE_COL_VEC ( 'PL_COL', NDOFL, SUBR_NAME )
 
-         CALL OURTIM                                       ! Get the loads for this subcase from I_PL, J_PL, PL and put into PL_COL
-         MODNAM = 'GET COL OF PL LOADS FOR                        Subcase'
-         WRITE(SC1,3093) LINKNO,MODNAM,ISUB,HOUR,MINUTE,SEC,SFRAC
+                                                           ! Get the loads for this subcase from I_PL, J_PL, PL and put into PL_COL
+         CALL LINK_MESSAGE_I('GET COL OF PL LOADS FOR                        Subcase', ISUB)
          DO J=1,NDOFL
             PL_COL(J)  = ZERO
             DUM_COL(J) = ZERO
@@ -248,9 +243,8 @@ Solve:DO ISUB = 1,NSUB
             WRITE(F06,*)
          ENDIF
  
-         CALL OURTIM                                       ! Call FBS to solve for displacements for this subcase
-         MODNAM = 'FBS - SOLVE FOR RHS ANSWERS FOR                   "'
-         WRITE(SC1,3093) LINKNO,MODNAM,ISUB,HOUR,MINUTE,SEC,SFRAC
+                                                           ! Call FBS to solve for displacements for this subcase
+         CALL LINK_MESSAGE_I('FBS - SOLVE FOR RHS ANSWERS FOR                   "', ISUB)
    !xx   WRITE(SC1, * )                                    ! Advance 1 line for screen messages
 
          IF      (SOLLIB == 'BANDED  ') THEN
@@ -293,17 +287,13 @@ Solve:DO ISUB = 1,NSUB
          ENDIF
  
          IF (EPSERR == 'Y') THEN                           ! Calculate residual vector, R. Use RES to calculate EPSILON
-            CALL OURTIM
-            MODNAM = 'CALC  EPSILON ERROR ESTIMATE                      "'
-            WRITE(SC1,3093) LINKNO,MODNAM,ISUB,HOUR,MINUTE,SEC,SFRAC
+            CALL LINK_MESSAGE_I('CALC  EPSILON ERROR ESTIMATE                      "', ISUB)
             CALL EPSCALC ( ISUB )
          ENDIF
                                                            ! Calculate the LAPACK error bounds
          IF ((RCONDK == 'Y') .AND. (SOLLIB == 'BANDED')) THEN 
             IF (DABS(RCOND) > MACH_SFMIN) THEN
-               CALL OURTIM
-               MODNAM = 'CALC LAPACK ERROR ESTIMATE                        "'
-               WRITE(SC1,3093) LINKNO,MODNAM,ISUB,HOUR,MINUTE,SEC,SFRAC
+               CALL LINK_MESSAGE_I('CALC LAPACK ERROR ESTIMATE                        "', ISUB)
                CALL VECINORM ( UL_COL, NDOFL,  UL_INORM )
                CALL VECINORM ( PL_COL, NDOFL,  PL_INORM )
                CALL VECINORM ( RES   , NDOFL, RES_INORM )
@@ -357,9 +347,7 @@ FreeS:IF (SOLLIB == 'SPARSE  ') THEN                       ! Last, free the stor
  
 ! Dellocate arrays
 
-      CALL OURTIM
-      MODNAM = 'DEALLOCATE ARRAYS'
-      WRITE(SC1,3092) LINKNO,MODNAM,HOUR,MINUTE,SEC,SFRAC
+      CALL LINK_MESSAGE('DEALLOCATE ARRAYS')
 !xx   WRITE(SC1, * )                                       ! Advance 1 line for screen messages         
 
       IF (SOL_NAME(1:8) == 'BUCKLING') THEN
@@ -377,7 +365,7 @@ FreeS:IF (SOLLIB == 'SPARSE  ') THEN                       ! Last, free the stor
 !xx   WRITE(SC1,12345,ADVANCE='NO') '       Deallocate PL_COL', CR13   ;   CALL DEALLOCATE_COL_VEC  ( 'PL_COL' )
 !xx   WRITE(SC1,12345,ADVANCE='NO') '       Deallocate PL    ', CR13   ;   CALL DEALLOCATE_SPARSE_MAT ( 'PL' )
 
-      CALL FILE_CLOSE ( L3A, LINK3A, 'KEEP', 'Y' )
+      CALL FILE_CLOSE ( L3A, LINK3A, 'KEEP' )
 
 ! Process is now complete so set COMM(LINKNO)
   
@@ -385,7 +373,7 @@ FreeS:IF (SOLLIB == 'SPARSE  ') THEN                       ! Last, free the stor
 
 ! Write data to L1A
 
-      CALL WRITE_L1A ( 'KEEP', 'Y', 'Y' )
+      CALL WRITE_L1A ( 'KEEP', 'Y' )
   
 ! Check allocation status of allocatable arrays, if requested
 
@@ -396,12 +384,9 @@ FreeS:IF (SOLLIB == 'SPARSE  ') THEN                       ! Last, free the stor
          ENDIF
       ENDIF
 
-! Write LINK3 end to F04, F06
+! Write LINK3 end to F06
 
       CALL OURTIM
-      IF (WRT_LOG > 0) THEN
-         WRITE(F04,151) LINKNO
-      ENDIF
       WRITE(F06,151) LINKNO
 
 ! Close files
@@ -459,10 +444,6 @@ FreeS:IF (SOLLIB == 'SPARSE  ') THEN                       ! Last, free the stor
                     ,/,14X,' IT IS TOO SMALL COMPARED TO MACHINE SAFE MINIMUN (MACH_SFMIN) = ',1ES15.6,/)
 
  3026 FORMAT(' *INFORMATION: CANNOT CALCULATE OMEGAI. DEN = 0',/)
-
- 3092 FORMAT(1X,I2,'/',A54,8X,2X,I2,':',I2,':',I2,'.',I3)
-
- 3093 FORMAT(1X,I2,'/',A54,I8,2X,I2,':',I2,':',I2,'.',I3)
 
  9991 FORMAT(' *ERROR  9991: PROGRAMMING ERROR IN SUBROUTINE ',A                                                                   &
                     ,/,14X,A, ' = ',A,' NOT PROGRAMMED ',A)

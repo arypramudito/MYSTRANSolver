@@ -19,9 +19,9 @@ BEGIN
     BLOCK "040904E4"
     BEGIN
       VALUE "FileDescription", "MYSTRAN Finite Element Solver"
-      VALUE "FileVersion", "17.0.0"
+      VALUE "FileVersion", "17.1.0"
       VALUE "ProductName", "MYSTRAN"
-      VALUE "ProductVersion", "17.0.0"
+      VALUE "ProductVersion", "17.1.0"
       VALUE "CompanyName", "Open-Source Project"
       VALUE "OriginalFilename", "mystran.exe"
     END

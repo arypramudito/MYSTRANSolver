@@ -1,0 +1,776 @@
+   423130010
+
+ MYSTRAN Version 18.0.0   APR 20 2026 MYSTRAN developed by Dr Bill Case
+*** Please report any problems to mystransolver@gmail.com ***                                                                                                                                                                                                   
+
+ >> MYSTRAN BEGIN  :  4/23/2026 at 13: 0:10.  9 The input file is ../Build_Test_Cases/statics/cquad4_pshell_center.bdf                                                                                                                                                                                                            
+
+
+ >> LINK  0 BEGIN
+
+
+ID PLATE,STATICS                                                                                                                                                                                                                                                
+SOL 1                                                                                                                                                                                                                                                           
+CEND                                                                                                                                                                                                                                                            
+TITLE = CQUAD4 TEST                                                                                                                                                                                                                                             
+ECHO = UNSORT                                                                                                                                                                                                                                                   
+DISP(    PRINT,PLOT,PUNCH) = ALL                                                                                                                                                                                                                                
+ELFORCE( PRINT,PLOT,PUNCH) = ALL                                                                                                                                                                                                                                
+GPFORCE( PRINT,PLOT) = ALL                                                                                                                                                                                                                                      
+MPCFORCE(PRINT,PLOT,PUNCH) = ALL                                                                                                                                                                                                                                
+OLOAD(   PRINT,PLOT,PUNCH) = ALL                                                                                                                                                                                                                                
+SPCFORCE(PRINT,PLOT,PUNCH) = ALL                                                                                                                                                                                                                                
+STRESS(  PRINT,PLOT,PUNCH) = ALL                                                                                                                                                                                                                                
+STRAIN(  PRINT,PLOT,PUNCH) = ALL                                                                                                                                                                                                                                
+SET 1 = 11                                                                                                                                                                                                                                                      
+ELDATA(0,PRINT) = ALL                                                                                                                                                                                                                                           
+ELDATA(1,PRINT) = ALL                                                                                                                                                                                                                                           
+ELDATA(2,PRINT) = ALL                                                                                                                                                                                                                                           
+ELDATA(3,PRINT) = ALL                                                                                                                                                                                                                                           
+ELDATA(4,PRINT) = ALL                                                                                                                                                                                                                                           
+ELDATA(5,PRINT) = ALL                                                                                                                                                                                                                                           
+SPC   = 101                                                                                                                                                                                                                                                     
+SUBCASE 1                                                                                                                                                                                                                                                       
+  LABEL = FORCE LOAD                                                                                                                                                                                                                                            
+  LOAD  = 1992                                                                                                                                                                                                                                                  
+SUBCASE 2                                                                                                                                                                                                                                                       
+  LABEL = PLOAD2 LOAD                                                                                                                                                                                                                                           
+  LOAD  = 1993                                                                                                                                                                                                                                                  
+SUBCASE 3                                                                                                                                                                                                                                                       
+  LABEL = PLOAD4 LOAD                                                                                                                                                                                                                                           
+  LOAD  = 1994                                                                                                                                                                                                                                                  
+BEGIN BULK                                                                                                                                                                                                                                                      
+ECHO: loadb GRID    1011              0.      0.      0.                                                                                                                                                                                                                    
+ECHO: loadb GRID    1012             50.      0.      0.                                                                                                                                                                                                                    
+ECHO: loadb GRID    1013             50.     50.      0.                                                                                                                                                                                                                    
+ECHO: loadb GRID    1014              0.     50.      0.                                                                                                                                                                                                                    
+ECHO: loadb CQUAD4  11      91      1011    1012    1013    1014                                                                                                                                                                                                            
+ECHO: loadb PSHELL, 91, 20,  0.1, 20,      1.0, 20, 0.83333, 0.1                                                                                                                                                                                                            
+ECHO: loadb MAT1    20      10.+6   4.+6    .25     .1                              +MAT1                                                                                                                                                                                   
+ECHO:  nextc +MAT1   20000.  20000.  20000.                                                                                                                                                                                                                                  
+ECHO: loadb FORCE   1992    1011            1000.   1.      1.       0.                                                                                                                                                                                                     
+ECHO: loadb FORCE   1992    1012            1000.   1.      1.       0.                                                                                                                                                                                                     
+ECHO: loadb FORCE   1992    1013            1000.   1.      1.       0.                                                                                                                                                                                                     
+ECHO: loadb PLOAD2, 1993, 1.1, 11                                                                                                                                                                                                                                           
+ECHO: loadb PLOAD4, 1994, 11, 1.1                                                                                                                                                                                                                                           
+ECHO: loadb SPC1, 101, 123456, 1011, 1012                                                                                                                                                                                                                                   
+ECHO: loadb PARAM   SOLLIB   INTMKL                                                                                                                                                                                                                                         
+ECHO: loadb PARAM   GRDPNT   0                                                                                                                                                                                                                                              
+ECHO: loadb PARAM   POST     -1                                                                                                                                                                                                                                             
+ECHO: loadb DEBUG   192     2                                                       GPFO SUMMARY                                                                                                                                                                            
+ECHO: loadb DEBUG   200     1                                                       ANS                                                                                                                                                                                     
+ECHO: loadb ENDDATA                                                                                                                                                                                                                                                         
+
+
+
+
+
+
+       O U T P U T   F R O M   T H E   G R I D   P O I N T   W E I G H T   G E N E R A T O R   F O R   O V E R A L L   M O D E L
+                                             (reference point is basic coord system origin)
+
+                                                      Total mass =  2.750000E+02
+
+                                                             X             Y             Z
+                                       C.G. location :  2.500000E+01  2.500000E+01  0.000000E+00
+                                        (relative to reference point in basic coordinate system)
+
+
+                             6x6 Rigid body mass matrix - about reference point in basic coordinate system
+                      ***                                                                                     ***
+                      *  2.750000E+02  0.000000E+00  0.000000E+00  *  0.000000E+00  0.000000E+00 -6.875000E+03  *
+                      *  0.000000E+00  2.750000E+02  0.000000E+00  * -0.000000E+00  0.000000E+00  6.875000E+03  *
+                      *  0.000000E+00  0.000000E+00  2.750000E+02  *  6.875000E+03 -6.875000E+03  0.000000E+00  *
+                      *  ************  ************  ************  *  ************  ************  ************  *
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  *  3.437500E+05 -1.718750E+05  0.000000E+00  *
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  * -1.718750E+05  3.437500E+05  0.000000E+00  *
+                      *  0.000000E+00  0.000000E+00  0.000000E+00  *  0.000000E+00  0.000000E+00  6.875000E+05  *
+                      ***                                                                                     ***
+
+
+                                    M.O.I. matrix - about reference point in basic coordinate system
+                                             ***                                        ***
+                                             *  3.437500E+05 -1.718750E+05  0.000000E+00  *
+                                             * -1.718750E+05  3.437500E+05  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  6.875000E+05  *
+                                             ***                                        ***
+
+
+                                  M.O.I. matrix - about above c.g. location in basic coordinate system
+                                             ***                                        ***
+                                             *  1.718750E+05  2.910383E-11  0.000000E+00  *
+                                             *  2.910383E-11  1.718750E+05  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  3.437500E+05  *
+                                             ***                                        ***
+
+
+                                     M.O.I. matrix - about above c.g. location in principal directions
+                                             ***                                        ***
+                                             *  1.718750E+05  1.651883E-11  0.000000E+00  *
+                                             *  2.014714E-13  1.718750E+05  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  3.437500E+05  *
+                                             ***                                        ***
+
+
+                                     Transformation from basic coordinates to principal directions
+                                             ***                                        ***
+                                             * -7.071068E-01  7.071068E-01  0.000000E+00  *
+                                             *  7.071068E-01  7.071068E-01  0.000000E+00  *
+                                             *  0.000000E+00  0.000000E+00  1.000000E+00  *
+                                             ***                                        ***
+
+
+
+ >> LINK  0 END
+
+
+ >> LINK  1 BEGIN
+
+               DEALLOCATED  9.22E-03 MB MEMORY FROM ARRAY STF3
+
+
+ *INFORMATION: AUTOSPC Summary, Stage 1 after identification of AUTOSPC's at the grid level                                                 
+
+                                     AUTOSPC_RAT = 1.000000E-08
+
+                       Number of DOF's identified for AUTOSPC in component  1         =            0
+                       Number of DOF's identified for AUTOSPC in component  2         =            0
+                       Number of DOF's identified for AUTOSPC in component  3         =            0
+                       Number of DOF's identified for AUTOSPC in component  4         =            0
+                       Number of DOF's identified for AUTOSPC in component  5         =            0
+                       Number of DOF's identified for AUTOSPC in component  6         =            2
+                                                                                        ------------
+                       Total number of DOF's identified in this stage                 =            2
+
+               DEALLOCATED  9.60E-05 MB MEMORY FROM ARRAY STFKEY
+               DEALLOCATED  9.22E-03 MB MEMORY FROM ARRAY STF3
+
+ >> LINK  1 END
+
+
+ >> LINK  2 BEGIN
+
+
+
+ *INFORMATION: AUTOSPC Summary, Overall: after identification of all AUTOSPC's                                                               
+
+                                     AUTOSPC_RAT = 1.000000E-08
+
+                       Number of DOF's identified for AUTOSPC in component  1         =            0
+                       Number of DOF's identified for AUTOSPC in component  2         =            0
+                       Number of DOF's identified for AUTOSPC in component  3         =            0
+                       Number of DOF's identified for AUTOSPC in component  4         =            0
+                       Number of DOF's identified for AUTOSPC in component  5         =            0
+                       Number of DOF's identified for AUTOSPC in component  6         =            2
+                                                                                        ------------
+                       Total number of DOF's identified overall                       =            2
+
+
+ >> LINK  2 END
+
+
+ >> LINK  3 BEGIN
+
+ SUPERLU FACTORIZATION OF MATRIX KLL SUCCEEDED IN SUBR SYM_MAT_DECOMP_SUPRLU          
+
+ *INFORMATION: FOR INTERNAL SUBCASE NUMBER        1 EPSILON ERROR ESTIMATE            = -7.438022E-17 Based on U'*(K*U - P)/(U'*P)
+
+ *INFORMATION: FOR INTERNAL SUBCASE NUMBER        2 EPSILON ERROR ESTIMATE            = -8.867228E-16 Based on U'*(K*U - P)/(U'*P)
+
+ *INFORMATION: FOR INTERNAL SUBCASE NUMBER        3 EPSILON ERROR ESTIMATE            = -8.867228E-16 Based on U'*(K*U - P)/(U'*P)
+
+
+ >> LINK  3 END
+
+
+ >> LINK  5 BEGIN
+
+
+ >> LINK  5 END
+
+
+ >> LINK  9 BEGIN
+
+
+
+ OUTPUT FOR SUBCASE        1
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ FORCE LOAD                                                                                                                                                                                                                                                      
+
+                                                       D I S P L A C E M E N T S
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+           1011        0  0.0           0.0           0.0           0.0           0.0           0.0         
+           1012        0  0.0           0.0           0.0           0.0           0.0           0.0         
+           1013        0  3.053279E-03  7.991803E-04  0.0           0.0           0.0           0.0         
+           1014        0  1.946721E-03  7.991803E-04  0.0           0.0           0.0           0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    3.053279E-03  7.991803E-04  0.0           0.0           0.0           0.0         
+                MIN* :    0.0           0.0           0.0           0.0           0.0           0.0         
+
+                ABS* :    3.053279E-03  7.991803E-04  0.0           0.0           0.0           0.0         
+                *for output set
+
+
+ OUTPUT FOR SUBCASE        1
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ FORCE LOAD                                                                                                                                                                                                                                                      
+
+                                                     A P P L I E D    F O R C E S
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+           1011        0  1.000000E+03  1.000000E+03  0.0           0.0           0.0           0.0         
+           1012        0  1.000000E+03  1.000000E+03  0.0           0.0           0.0           0.0         
+           1013        0  1.000000E+03  1.000000E+03  0.0           0.0           0.0           0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    1.000000E+03  1.000000E+03  0.0           0.0           0.0           0.0         
+                MIN* :    0.0           0.0           0.0           0.0           0.0           0.0         
+
+                ABS* :    1.000000E+03  1.000000E+03  0.0           0.0           0.0           0.0         
+                *for output set
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ APPLIED FORCE TOTALS:    3.000000E+03  3.000000E+03  0.0           0.0           0.0           0.0         
+   (for output set)
+
+
+ OUTPUT FOR SUBCASE        1
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ FORCE LOAD                                                                                                                                                                                                                                                      
+
+                                                          S P C   F O R C E S
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+           1011        0 -1.803279E+03 -2.000000E+03  0.0           0.0           0.0           0.0         
+           1012        0 -1.196721E+03 -1.000000E+03  0.0           0.0           0.0           0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+     SPC FORCE TOTALS:   -3.000000E+03 -3.000000E+03  0.0           0.0           0.0           0.0         
+     (for output set)
+
+                                                    SPC Force Summary on AUTOSPC'd DOF's
+                                                 (in global coordinate system at each grid)
+        For detailed information on the SPC forces for the AUTOSPC DOF's, set field 7 (AUTOSPC_SPCF) on the PARAM AUTOSPC entry to Y
+
+                              T1             T2             T3             R1             R2             R3
+
+ ABS AUTOSPC FORCES  :   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00
+ AUTOSPC FORCE TOTALS:   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00
+     (for output set)
+
+
+ OUTPUT FOR SUBCASE        1
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ FORCE LOAD                                                                                                                      
+
+
+
+                                           G R I D   P O I N T   F O R C E   B A L A N C E
+                                             (in global coordinate system at each grid)
+
+                                FORCE BALANCE FOR GRID POINT     1011 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            1.000000E+03  1.000000E+03  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE               -1.803279E+03 -2.000000E+03  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ QUAD4    ELEM        11  8.032787E+02  1.000000E+03  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  1.136868E-13  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT     1012 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            1.000000E+03  1.000000E+03  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ SPC FORCE               -1.196721E+03 -1.000000E+03  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ QUAD4    ELEM        11  1.967213E+02  1.136868E-13  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                : -2.842171E-14  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT     1013 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            1.000000E+03  1.000000E+03  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ QUAD4    ELEM        11 -1.000000E+03 -1.000000E+03  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT     1014 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ QUAD4    ELEM        11  1.705303E-13 -5.684342E-14  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  1.705303E-13 -5.684342E-14  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ (should all be 0)
+
+
+                                      Max abs values of force imbalance totals from above grids
+
+                               T1            T2            T3            R1            R2            R3
+
+ Max abs imbal any grid:  1.705303E-13  5.684342E-14  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ Max abs force any grid:  1.803279E+03  2.000000E+03  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ as % of max abs force :      9.46E-15%     2.84E-15%                                                        
+ Occurs at grid*       :      1014          1014          1011          1011          1011          1011
+ (*for output set)
+
+
+ OUTPUT FOR SUBCASE        1
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ FORCE LOAD                                                                                                                                                                                                                                                      
+
+                                                       E L E M E N T   E N G I N E E R I N G   F O R C E S
+                                                           F O R   E L E M E N T   T Y P E   Q U A D 4  
+  Element Location               N o r m a l   F o r c e s                       M o m e n t s                   T r a n s v e r s e
+     ID                                                                                                        S h e a r   F o r c e s
+                              Nxx           Nyy           Nxy           Mxx           Myy           Mxy            Qx           Qy
+       11                 1.606557E+01  2.000000E+01  2.000000E+01  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+                          ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    1.606557E+01  2.000000E+01  2.000000E+01  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+                MIN* :    1.606557E+01  2.000000E+01  2.000000E+01  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+
+                ABS* :    1.606557E+01  2.000000E+01  2.000000E+01  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+                *for output set
+
+
+ OUTPUT FOR SUBCASE        1
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ FORCE LOAD                                                                                                                                                                                                                                                      
+
+                                          E L E M E N T   S T R E S S E S   I N   L O C A L   E L E M E N T   C O O R D I N A T E   S Y S T E M
+                                                                       F O R   E L E M E N T   T Y P E   Q U A D 4  
+    Elem  Location       Fibre       Stresses In Element Coord System     Principal Stresses (Zero Shear)               Transverse   Transverse   % Poly
+     ID                 Distance    Normal-X     Normal-Y     Shear-XY     Angle     Major        Minor      von Mises    Shear-XZ     Shear-YZ    Fit Err
+                                                                                                                         (max through thickness)
+
+       11  CENTER      -5.000E-02  1.60656E+02  2.00000E+02  2.00000E+02   47.81  3.81293E+02 -2.06373E+01  3.92019E+02  0.00000E+00  0.00000E+00
+                        5.000E-02  1.60656E+02  2.00000E+02  2.00000E+02   47.81  3.81293E+02 -2.06373E+01  3.92019E+02
+                                  ------------ ------------ ------------         ------------ ------------ ------------ ------------ ------------ --------
+ MAX* :                            1.60656E+02  2.00000E+02  2.00000E+02          3.81293E+02 -2.06373E+01  3.92019E+02  0.00000E+00  0.00000E+00  0.0E+00
+ MIN* :                            1.60656E+02  2.00000E+02  2.00000E+02          3.81293E+02 -2.06373E+01  3.92019E+02  0.00000E+00  0.00000E+00  0.0E+00
+
+ ABS* :                            1.60656E+02  2.00000E+02  2.00000E+02          3.81293E+02  2.06373E+01  3.92019E+02  0.00000E+00  0.00000E+00  0.0E+00
+ *for output set
+
+
+ OUTPUT FOR SUBCASE        1
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ FORCE LOAD                                                                                                                                                                                                                                                      
+
+                                           E L E M E N T   S T R A I N S   I N   L O C A L   E L E M E N T   C O O R D I N A T E   S Y S T E M
+                                                                       F O R   E L E M E N T   T Y P E   Q U A D 4  
+  Elem  Location         Fibre      Strains In Element Coord System       Principal Strains (Zero Shear)                 Transverse   Transverse   % Poly
+   ID                   Distance   Normal-X     Normal-Y     Shear-XY     Angle      Major        Minor      von Mises    Shear-XZ     Shear-YZ    Fit Err 
+
+       11  CENTER      -5.000E-02  1.10656E-05  1.59836E-05  5.00000E-05   46.41  6.35850E-05 -3.65358E-05  8.77557E-05  0.00000E+00  0.00000E+00
+                        5.000E-02  1.10656E-05  1.59836E-05  5.00000E-05   46.41  6.35850E-05 -3.65358E-05  8.77557E-05
+                                  ------------ ------------ ------------         ------------ ------------ ------------ ------------ ------------ --------
+ MAX* :                            1.10656E-05  1.59836E-05  5.00000E-05          6.35850E-05 -3.65358E-05  8.77557E-05  0.00000E+00  0.00000E+00  0.0E+00
+ MIN* :                            1.10656E-05  1.59836E-05  5.00000E-05          6.35850E-05 -3.65358E-05  8.77557E-05  0.00000E+00  0.00000E+00  0.0E+00
+
+ ABS* :                            1.10656E-05  1.59836E-05  5.00000E-05          6.35850E-05  3.65358E-05  8.77557E-05  0.00000E+00  0.00000E+00  0.0E+00
+ *for output set
+
+
+ OUTPUT FOR SUBCASE        2
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ PLOAD2 LOAD                                                                                                                                                                                                                                                     
+
+                                                       D I S P L A C E M E N T S
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+           1011        0  0.0           0.0           0.0           0.0           0.0           0.0         
+           1012        0  0.0           0.0           0.0           0.0           0.0           0.0         
+           1013        0  0.0           0.0           8.504024E+02  2.685846E+01  4.308850E+00  0.0         
+           1014        0  0.0           0.0           8.504024E+02  2.685846E+01 -4.308850E+00  0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    0.0           0.0           8.504024E+02  2.685846E+01  4.308850E+00  0.0         
+                MIN* :    0.0           0.0           0.0           0.0          -4.308850E+00  0.0         
+
+                ABS* :    0.0           0.0           8.504024E+02  2.685846E+01  4.308850E+00  0.0         
+                *for output set
+
+
+ OUTPUT FOR SUBCASE        2
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ PLOAD2 LOAD                                                                                                                                                                                                                                                     
+
+                                                     A P P L I E D    F O R C E S
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+           1011        0  0.0           0.0           6.875000E+02  5.729167E+03 -5.729167E+03  0.0         
+           1012        0  0.0           0.0           6.875000E+02  5.729167E+03  5.729167E+03  0.0         
+           1013        0  0.0           0.0           6.875000E+02 -5.729167E+03  5.729167E+03  0.0         
+           1014        0  0.0           0.0           6.875000E+02 -5.729167E+03 -5.729167E+03  0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    0.0           0.0           6.875000E+02  5.729167E+03  5.729167E+03  0.0         
+                MIN* :    0.0           0.0           6.875000E+02 -5.729167E+03 -5.729167E+03  0.0         
+
+                ABS* :    0.0           0.0           6.875000E+02  5.729167E+03  5.729167E+03  0.0         
+                *for output set
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ APPLIED FORCE TOTALS:    0.0           0.0           2.750000E+03  0.0           0.0           0.0         
+   (for output set)
+
+
+ OUTPUT FOR SUBCASE        2
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ PLOAD2 LOAD                                                                                                                                                                                                                                                     
+
+                                                          S P C   F O R C E S
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+           1011        0  0.0           0.0          -1.375000E+03 -3.437500E+04  1.359679E+04  0.0         
+           1012        0  0.0           0.0          -1.375000E+03 -3.437500E+04 -1.359679E+04  0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+     SPC FORCE TOTALS:    0.0           0.0          -2.750000E+03 -6.875000E+04  1.455192E-11  0.0         
+     (for output set)
+
+                                                    SPC Force Summary on AUTOSPC'd DOF's
+                                                 (in global coordinate system at each grid)
+        For detailed information on the SPC forces for the AUTOSPC DOF's, set field 7 (AUTOSPC_SPCF) on the PARAM AUTOSPC entry to Y
+
+                              T1             T2             T3             R1             R2             R3
+
+ ABS AUTOSPC FORCES  :   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00
+ AUTOSPC FORCE TOTALS:   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00
+     (for output set)
+
+
+ OUTPUT FOR SUBCASE        2
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ PLOAD2 LOAD                                                                                                                     
+
+
+
+                                           G R I D   P O I N T   F O R C E   B A L A N C E
+                                             (in global coordinate system at each grid)
+
+                                FORCE BALANCE FOR GRID POINT     1011 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00  6.875000E+02  5.729167E+03 -5.729167E+03  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00 -1.375000E+03 -3.437500E+04  1.359679E+04  0.000000E+00
+ QUAD4    ELEM        11  0.000000E+00  0.000000E+00  6.875000E+02  2.864583E+04 -7.867625E+03  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT     1012 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00  6.875000E+02  5.729167E+03  5.729167E+03  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00 -1.375000E+03 -3.437500E+04 -1.359679E+04  0.000000E+00
+ QUAD4    ELEM        11  0.000000E+00  0.000000E+00  6.875000E+02  2.864583E+04  7.867625E+03  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  1.136868E-13 -3.637979E-12  0.000000E+00  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT     1013 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00  6.875000E+02 -5.729167E+03  5.729167E+03  0.000000E+00
+ QUAD4    ELEM        11  0.000000E+00  0.000000E+00 -6.875000E+02  5.729167E+03 -5.729167E+03  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  0.000000E+00  1.000444E-11 -1.637090E-11  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT     1014 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00  6.875000E+02 -5.729167E+03 -5.729167E+03  0.000000E+00
+ QUAD4    ELEM        11  0.000000E+00  0.000000E+00 -6.875000E+02  5.729167E+03  5.729167E+03  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  4.547474E-13  7.275958E-12 -6.366463E-12  0.000000E+00
+ (should all be 0)
+
+
+                                      Max abs values of force imbalance totals from above grids
+
+                               T1            T2            T3            R1            R2            R3
+
+ Max abs imbal any grid:  0.000000E+00  0.000000E+00  4.547474E-13  1.000444E-11  1.637090E-11  0.000000E+00
+ Max abs force any grid:  0.000000E+00  0.000000E+00  1.375000E+03  3.437500E+04  1.359679E+04  0.000000E+00
+ as % of max abs force :                                  3.31E-14%     2.91E-14%     1.20E-13%              
+ Occurs at grid*       :      1011          1011          1014          1013          1013          1011
+ (*for output set)
+
+
+ OUTPUT FOR SUBCASE        2
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ PLOAD2 LOAD                                                                                                                                                                                                                                                     
+
+                                                       E L E M E N T   E N G I N E E R I N G   F O R C E S
+                                                           F O R   E L E M E N T   T Y P E   Q U A D 4  
+  Element Location               N o r m a l   F o r c e s                       M o m e n t s                   T r a n s v e r s e
+     ID                                                                                                        S h e a r   F o r c e s
+                              Nxx           Nyy           Nxy           Mxx           Myy           Mxy            Qx           Qy
+       11                 0.000000E+00  0.000000E+00  0.000000E+00  4.276917E+01  4.583333E+02 -6.476301E-14  4.263175E-15  2.750000E+01
+                          ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    0.000000E+00  0.000000E+00  0.000000E+00  4.276917E+01  4.583333E+02 -6.476301E-14  4.263175E-15  2.750000E+01
+                MIN* :    0.000000E+00  0.000000E+00  0.000000E+00  4.276917E+01  4.583333E+02 -6.476301E-14  4.263175E-15  2.750000E+01
+
+                ABS* :    0.000000E+00  0.000000E+00  0.000000E+00  4.276917E+01  4.583333E+02  6.476301E-14  4.263175E-15  2.750000E+01
+                *for output set
+
+
+ OUTPUT FOR SUBCASE        2
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ PLOAD2 LOAD                                                                                                                                                                                                                                                     
+
+                                          E L E M E N T   S T R E S S E S   I N   L O C A L   E L E M E N T   C O O R D I N A T E   S Y S T E M
+                                                                       F O R   E L E M E N T   T Y P E   Q U A D 4  
+    Elem  Location       Fibre       Stresses In Element Coord System     Principal Stresses (Zero Shear)               Transverse   Transverse   % Poly
+     ID                 Distance    Normal-X     Normal-Y     Shear-XY     Angle     Major        Minor      von Mises    Shear-XZ     Shear-YZ    Fit Err
+                                                                                                                         (max through thickness)
+
+       11  CENTER      -5.000E-02  2.56615E+04  2.75000E+05 -3.88578E-11  -90.00  2.75000E+05  2.56615E+04  2.63109E+05  5.11583E-14  3.30001E+02
+                        5.000E-02 -2.56615E+04 -2.75000E+05  3.88578E-11    0.00 -2.56615E+04 -2.75000E+05  2.63109E+05
+                                  ------------ ------------ ------------         ------------ ------------ ------------ ------------ ------------ --------
+ MAX* :                            2.56615E+04  2.75000E+05  3.88578E-11          2.75000E+05  2.56615E+04  2.63109E+05  5.11583E-14  3.30001E+02  0.0E+00
+ MIN* :                           -2.56615E+04 -2.75000E+05 -3.88578E-11         -2.56615E+04 -2.75000E+05  2.63109E+05  5.11583E-14  3.30001E+02  0.0E+00
+
+ ABS* :                            2.56615E+04  2.75000E+05  3.88578E-11          2.75000E+05  2.75000E+05  2.63109E+05  5.11583E-14  3.30001E+02  0.0E+00
+ *for output set
+
+
+ OUTPUT FOR SUBCASE        2
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ PLOAD2 LOAD                                                                                                                                                                                                                                                     
+
+                                           E L E M E N T   S T R A I N S   I N   L O C A L   E L E M E N T   C O O R D I N A T E   S Y S T E M
+                                                                       F O R   E L E M E N T   T Y P E   Q U A D 4  
+  Elem  Location         Fibre      Strains In Element Coord System       Principal Strains (Zero Shear)                 Transverse   Transverse   % Poly
+   ID                   Distance   Normal-X     Normal-Y     Shear-XY     Angle      Major        Minor      von Mises    Shear-XZ     Shear-YZ    Fit Err 
+
+       11  CENTER      -5.000E-02 -4.30885E-03  2.68585E-02 -9.71445E-18  -90.00  2.68585E-02 -4.30885E-03  2.92519E-02  6.66134E-16  4.29696E+00
+                        5.000E-02  4.30885E-03 -2.68585E-02  9.71445E-18    0.00  4.30885E-03 -2.68585E-02  2.92519E-02
+                                  ------------ ------------ ------------         ------------ ------------ ------------ ------------ ------------ --------
+ MAX* :                            4.30885E-03  2.68585E-02  9.71445E-18          2.68585E-02 -4.30885E-03  2.92519E-02  6.66134E-16  4.29696E+00  0.0E+00
+ MIN* :                           -4.30885E-03 -2.68585E-02 -9.71445E-18          4.30885E-03 -2.68585E-02  2.92519E-02  6.66134E-16  4.29696E+00  0.0E+00
+
+ ABS* :                            4.30885E-03  2.68585E-02  9.71445E-18          2.68585E-02  2.68585E-02  2.92519E-02  6.66134E-16  4.29696E+00  0.0E+00
+ *for output set
+
+
+ OUTPUT FOR SUBCASE        3
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ PLOAD4 LOAD                                                                                                                                                                                                                                                     
+
+                                                       D I S P L A C E M E N T S
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+           1011        0  0.0           0.0           0.0           0.0           0.0           0.0         
+           1012        0  0.0           0.0           0.0           0.0           0.0           0.0         
+           1013        0  0.0           0.0           8.504024E+02  2.685846E+01  4.308850E+00  0.0         
+           1014        0  0.0           0.0           8.504024E+02  2.685846E+01 -4.308850E+00  0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    0.0           0.0           8.504024E+02  2.685846E+01  4.308850E+00  0.0         
+                MIN* :    0.0           0.0           0.0           0.0          -4.308850E+00  0.0         
+
+                ABS* :    0.0           0.0           8.504024E+02  2.685846E+01  4.308850E+00  0.0         
+                *for output set
+
+
+ OUTPUT FOR SUBCASE        3
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ PLOAD4 LOAD                                                                                                                                                                                                                                                     
+
+                                                     A P P L I E D    F O R C E S
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+           1011        0  0.0           0.0           6.875000E+02  5.729167E+03 -5.729167E+03  0.0         
+           1012        0  0.0           0.0           6.875000E+02  5.729167E+03  5.729167E+03  0.0         
+           1013        0  0.0           0.0           6.875000E+02 -5.729167E+03  5.729167E+03  0.0         
+           1014        0  0.0           0.0           6.875000E+02 -5.729167E+03 -5.729167E+03  0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    0.0           0.0           6.875000E+02  5.729167E+03  5.729167E+03  0.0         
+                MIN* :    0.0           0.0           6.875000E+02 -5.729167E+03 -5.729167E+03  0.0         
+
+                ABS* :    0.0           0.0           6.875000E+02  5.729167E+03  5.729167E+03  0.0         
+                *for output set
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ APPLIED FORCE TOTALS:    0.0           0.0           2.750000E+03  0.0           0.0           0.0         
+   (for output set)
+
+
+ OUTPUT FOR SUBCASE        3
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ PLOAD4 LOAD                                                                                                                                                                                                                                                     
+
+                                                          S P C   F O R C E S
+                                              (in global coordinate system at each grid)
+           GRID     COORD      T1            T2            T3            R1            R2            R3
+                     SYS
+           1011        0  0.0           0.0          -1.375000E+03 -3.437500E+04  1.359679E+04  0.0         
+           1012        0  0.0           0.0          -1.375000E+03 -3.437500E+04 -1.359679E+04  0.0         
+                         ------------- ------------- ------------- ------------- ------------- -------------
+     SPC FORCE TOTALS:    0.0           0.0          -2.750000E+03 -6.875000E+04  1.455192E-11  0.0         
+     (for output set)
+
+                                                    SPC Force Summary on AUTOSPC'd DOF's
+                                                 (in global coordinate system at each grid)
+        For detailed information on the SPC forces for the AUTOSPC DOF's, set field 7 (AUTOSPC_SPCF) on the PARAM AUTOSPC entry to Y
+
+                              T1             T2             T3             R1             R2             R3
+
+ ABS AUTOSPC FORCES  :   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00
+ AUTOSPC FORCE TOTALS:   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00   0.000000E+00
+     (for output set)
+
+
+ OUTPUT FOR SUBCASE        3
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ PLOAD4 LOAD                                                                                                                     
+
+
+
+                                           G R I D   P O I N T   F O R C E   B A L A N C E
+                                             (in global coordinate system at each grid)
+
+                                FORCE BALANCE FOR GRID POINT     1011 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00  6.875000E+02  5.729167E+03 -5.729167E+03  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00 -1.375000E+03 -3.437500E+04  1.359679E+04  0.000000E+00
+ QUAD4    ELEM        11  0.000000E+00  0.000000E+00  6.875000E+02  2.864583E+04 -7.867625E+03  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT     1012 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00  6.875000E+02  5.729167E+03  5.729167E+03  0.000000E+00
+ SPC FORCE                0.000000E+00  0.000000E+00 -1.375000E+03 -3.437500E+04 -1.359679E+04  0.000000E+00
+ QUAD4    ELEM        11  0.000000E+00  0.000000E+00  6.875000E+02  2.864583E+04  7.867625E+03  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  1.136868E-13 -3.637979E-12  0.000000E+00  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT     1013 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00  6.875000E+02 -5.729167E+03  5.729167E+03  0.000000E+00
+ QUAD4    ELEM        11  0.000000E+00  0.000000E+00 -6.875000E+02  5.729167E+03 -5.729167E+03  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  0.000000E+00  1.000444E-11 -1.637090E-11  0.000000E+00
+ (should all be 0)
+
+
+                                FORCE BALANCE FOR GRID POINT     1014 IN GLOBAL COORD SYSTEM        0
+
+                               T1            T2            T3            R1            R2            R3
+
+ APPLIED FORCE            0.000000E+00  0.000000E+00  6.875000E+02 -5.729167E+03 -5.729167E+03  0.000000E+00
+ QUAD4    ELEM        11  0.000000E+00  0.000000E+00 -6.875000E+02  5.729167E+03  5.729167E+03  0.000000E+00
+                         ------------- ------------- ------------- ------------- ------------- -------------
+ TOTALS                :  0.000000E+00  0.000000E+00  4.547474E-13  7.275958E-12 -6.366463E-12  0.000000E+00
+ (should all be 0)
+
+
+                                      Max abs values of force imbalance totals from above grids
+
+                               T1            T2            T3            R1            R2            R3
+
+ Max abs imbal any grid:  0.000000E+00  0.000000E+00  4.547474E-13  1.000444E-11  1.637090E-11  0.000000E+00
+ Max abs force any grid:  0.000000E+00  0.000000E+00  1.375000E+03  3.437500E+04  1.359679E+04  0.000000E+00
+ as % of max abs force :                                  3.31E-14%     2.91E-14%     1.20E-13%              
+ Occurs at grid*       :      1011          1011          1014          1013          1013          1011
+ (*for output set)
+
+
+ OUTPUT FOR SUBCASE        3
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ PLOAD4 LOAD                                                                                                                                                                                                                                                     
+
+                                                       E L E M E N T   E N G I N E E R I N G   F O R C E S
+                                                           F O R   E L E M E N T   T Y P E   Q U A D 4  
+  Element Location               N o r m a l   F o r c e s                       M o m e n t s                   T r a n s v e r s e
+     ID                                                                                                        S h e a r   F o r c e s
+                              Nxx           Nyy           Nxy           Mxx           Myy           Mxy            Qx           Qy
+       11                 0.000000E+00  0.000000E+00  0.000000E+00  4.276917E+01  4.583333E+02 -6.476301E-14  4.263175E-15  2.750000E+01
+                          ------------- ------------- ------------- ------------- ------------- ------------- ------------- -------------
+                MAX* :    0.000000E+00  0.000000E+00  0.000000E+00  4.276917E+01  4.583333E+02 -6.476301E-14  4.263175E-15  2.750000E+01
+                MIN* :    0.000000E+00  0.000000E+00  0.000000E+00  4.276917E+01  4.583333E+02 -6.476301E-14  4.263175E-15  2.750000E+01
+
+                ABS* :    0.000000E+00  0.000000E+00  0.000000E+00  4.276917E+01  4.583333E+02  6.476301E-14  4.263175E-15  2.750000E+01
+                *for output set
+
+
+ OUTPUT FOR SUBCASE        3
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ PLOAD4 LOAD                                                                                                                                                                                                                                                     
+
+                                          E L E M E N T   S T R E S S E S   I N   L O C A L   E L E M E N T   C O O R D I N A T E   S Y S T E M
+                                                                       F O R   E L E M E N T   T Y P E   Q U A D 4  
+    Elem  Location       Fibre       Stresses In Element Coord System     Principal Stresses (Zero Shear)               Transverse   Transverse   % Poly
+     ID                 Distance    Normal-X     Normal-Y     Shear-XY     Angle     Major        Minor      von Mises    Shear-XZ     Shear-YZ    Fit Err
+                                                                                                                         (max through thickness)
+
+       11  CENTER      -5.000E-02  2.56615E+04  2.75000E+05 -3.88578E-11  -90.00  2.75000E+05  2.56615E+04  2.63109E+05  5.11583E-14  3.30001E+02
+                        5.000E-02 -2.56615E+04 -2.75000E+05  3.88578E-11    0.00 -2.56615E+04 -2.75000E+05  2.63109E+05
+                                  ------------ ------------ ------------         ------------ ------------ ------------ ------------ ------------ --------
+ MAX* :                            2.56615E+04  2.75000E+05  3.88578E-11          2.75000E+05  2.56615E+04  2.63109E+05  5.11583E-14  3.30001E+02  0.0E+00
+ MIN* :                           -2.56615E+04 -2.75000E+05 -3.88578E-11         -2.56615E+04 -2.75000E+05  2.63109E+05  5.11583E-14  3.30001E+02  0.0E+00
+
+ ABS* :                            2.56615E+04  2.75000E+05  3.88578E-11          2.75000E+05  2.75000E+05  2.63109E+05  5.11583E-14  3.30001E+02  0.0E+00
+ *for output set
+
+
+ OUTPUT FOR SUBCASE        3
+ CQUAD4 TEST                                                                                                                                                                                                                                                     
+ PLOAD4 LOAD                                                                                                                                                                                                                                                     
+
+                                           E L E M E N T   S T R A I N S   I N   L O C A L   E L E M E N T   C O O R D I N A T E   S Y S T E M
+                                                                       F O R   E L E M E N T   T Y P E   Q U A D 4  
+  Elem  Location         Fibre      Strains In Element Coord System       Principal Strains (Zero Shear)                 Transverse   Transverse   % Poly
+   ID                   Distance   Normal-X     Normal-Y     Shear-XY     Angle      Major        Minor      von Mises    Shear-XZ     Shear-YZ    Fit Err 
+
+       11  CENTER      -5.000E-02 -4.30885E-03  2.68585E-02 -9.71445E-18  -90.00  2.68585E-02 -4.30885E-03  2.92519E-02  6.66134E-16  4.29696E+00
+                        5.000E-02  4.30885E-03 -2.68585E-02  9.71445E-18    0.00  4.30885E-03 -2.68585E-02  2.92519E-02
+                                  ------------ ------------ ------------         ------------ ------------ ------------ ------------ ------------ --------
+ MAX* :                            4.30885E-03  2.68585E-02  9.71445E-18          2.68585E-02 -4.30885E-03  2.92519E-02  6.66134E-16  4.29696E+00  0.0E+00
+ MIN* :                           -4.30885E-03 -2.68585E-02 -9.71445E-18          4.30885E-03 -2.68585E-02  2.92519E-02  6.66134E-16  4.29696E+00  0.0E+00
+
+ ABS* :                            4.30885E-03  2.68585E-02  9.71445E-18          2.68585E-02  2.68585E-02  2.92519E-02  6.66134E-16  4.29696E+00  0.0E+00
+ *for output set
+
+ >> LINK  9 END
+
+    Total CPU time =  7.81E-02 seconds
+
+ >> MYSTRAN END    :  4/23/2026 at 13: 0:10. 79

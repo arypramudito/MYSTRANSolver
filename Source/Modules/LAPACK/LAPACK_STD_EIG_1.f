@@ -167,7 +167,7 @@
       END IF
 *
       IF( INFO.NE.0 ) THEN
-         CALL XERBLA( 'DSYEV ', -INFO )
+         CALL MYSTRAN_XERBLA( 'DSYEV ', -INFO )
          RETURN
       END IF
 *
@@ -421,7 +421,7 @@
          INFO = -9
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL XERBLA( 'DSYTRD', -INFO )
+         CALL MYSTRAN_XERBLA( 'DSYTRD', -INFO )
          RETURN
       END IF
 *
@@ -648,7 +648,7 @@
          INFO = -7
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL XERBLA( 'DORGTR', -INFO )
+         CALL MYSTRAN_XERBLA( 'DORGTR', -INFO )
          RETURN
       END IF
 *

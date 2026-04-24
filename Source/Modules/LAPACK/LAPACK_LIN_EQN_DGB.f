@@ -175,7 +175,7 @@
          INFO = -6
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL XERBLA( 'DGBTRF', -INFO )
+         CALL MYSTRAN_XERBLA( 'DGBTRF', -INFO )
          RETURN
       END IF
 *
@@ -616,7 +616,7 @@
          INFO = -10
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL XERBLA( 'DGBTRS', -INFO )
+         CALL MYSTRAN_XERBLA( 'DGBTRS', -INFO )
          RETURN
       END IF
 *
@@ -824,7 +824,7 @@
          INFO = -6
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL XERBLA( 'DGBTF2', -INFO )
+         CALL MYSTRAN_XERBLA( 'DGBTF2', -INFO )
          RETURN
       END IF
 *

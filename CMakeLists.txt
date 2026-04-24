@@ -292,7 +292,8 @@ file(GLOB_RECURSE ALL_FORTRAN_FILES
 # BLAS configuration
 if(MYSTRAN_USE_OPENBLAS)
     message(STATUS "Using OpenBLAS: ${TPL_BLAS_LIBRARIES}")
-    set(missing_blas_src "${BLAS_SOURCE_DIR}/XERBLA.f")
+    # XERBLA.f removed per admin architecture; MYSTRAN_XERBLA.f90 handles MYSTRAN-side aborts.
+    set(missing_blas_src "")
 else()
     # same BLAS-finding subroutine as SuperLU
     if(NOT enable_internal_blaslib)

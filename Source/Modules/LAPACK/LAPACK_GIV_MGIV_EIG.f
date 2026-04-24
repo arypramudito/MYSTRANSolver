@@ -315,7 +315,7 @@
       END IF
 *
       IF( INFO.NE.0 ) THEN
-         CALL XERBLA( 'DSBGVX_GIV_MGIV', -INFO )
+         CALL MYSTRAN_XERBLA( 'DSBGVX_GIV_MGIV', -INFO )
       END IF
 *
 *     Form a split Cholesky factorization of B.
@@ -714,7 +714,7 @@
          INFO = -5
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL XERBLA( 'DPBSTF', -INFO )
+         CALL MYSTRAN_XERBLA( 'DPBSTF', -INFO )
          RETURN
       END IF
 *
@@ -975,7 +975,7 @@
          INFO = -11
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL XERBLA( 'DSBGST', -INFO )
+         CALL MYSTRAN_XERBLA( 'DSBGST', -INFO )
          RETURN
       END IF
 *
@@ -2375,7 +2375,7 @@
          INFO = -10
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL XERBLA( 'DSBTRD', -INFO )
+         CALL MYSTRAN_XERBLA( 'DSBTRD', -INFO )
          RETURN
       END IF
 *
@@ -3068,7 +3068,7 @@
       END IF
 *
       IF( INFO.NE.0 ) THEN
-         CALL XERBLA( 'DSTEBZ', -INFO )
+         CALL MYSTRAN_XERBLA( 'DSTEBZ', -INFO )
          RETURN
       END IF
 *
@@ -3690,7 +3690,7 @@
       END IF
 *
       IF( INFO.NE.0 ) THEN
-         CALL XERBLA( 'DSTEIN', -INFO )
+         CALL MYSTRAN_XERBLA( 'DSTEIN', -INFO )
          RETURN
       END IF
 *
@@ -4020,7 +4020,7 @@
       INFO = 0
       IF( N.LT.0 ) THEN
          INFO = -1
-         CALL XERBLA( 'DLAGTF', -INFO )
+         CALL MYSTRAN_XERBLA( 'DLAGTF', -INFO )
          RETURN
       END IF
 *

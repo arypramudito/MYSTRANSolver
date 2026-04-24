@@ -152,7 +152,7 @@
          INFO = -5
       END IF
       IF( INFO /= 0 ) THEN
-         CALL XERBLA( 'DPBEQU', -INFO )
+         CALL MYSTRAN_XERBLA( 'DPBEQU', -INFO )
          go to 9000          ! My line
       END IF
 *
@@ -364,7 +364,7 @@
          INFO = -5
       END IF
       IF( INFO /= 0 ) THEN
-         CALL XERBLA( 'DPBTRF', -INFO )
+         CALL MYSTRAN_XERBLA( 'DPBTRF', -INFO )
          go to 9000          ! My line
       END IF
 *
@@ -753,7 +753,7 @@
          INFO = -5
       END IF
       IF( INFO /= 0 ) THEN
-         CALL XERBLA( 'DPBTF2', -INFO )
+         CALL MYSTRAN_XERBLA( 'DPBTF2', -INFO )
          go to 9000          ! My line
       END IF
 *
@@ -944,7 +944,7 @@
          INFO = -4
       END IF
       IF( INFO /= 0 ) THEN
-         CALL XERBLA( 'DPOTF2', -INFO )
+         CALL MYSTRAN_XERBLA( 'DPOTF2', -INFO )
          go to 9000          ! My line
       END IF
 *
@@ -1148,7 +1148,7 @@
          INFO = -6
       END IF
       IF( INFO /= 0 ) THEN
-         CALL XERBLA( 'DPBCON', -INFO )
+         CALL MYSTRAN_XERBLA( 'DPBCON', -INFO )
          go to 9000          ! My line
       END IF
 *
@@ -1344,7 +1344,7 @@
          INFO = -8
       END IF
       IF( INFO /= 0 ) THEN
-         CALL XERBLA( 'DPBTRS', -INFO )
+         CALL MYSTRAN_XERBLA( 'DPBTRS', -INFO )
          go to 9000          ! My line
       END IF
 *
@@ -1487,7 +1487,7 @@
       INFO = 0
       IF( N.LT.0 ) THEN
          INFO = -1
-         CALL XERBLA( 'DPTTRF', -INFO )
+         CALL MYSTRAN_XERBLA( 'DPTTRF', -INFO )
          RETURN
       END IF
 *
@@ -1744,7 +1744,7 @@
          INFO = -4
       END IF
       IF( INFO.NE.0 ) THEN
-         CALL XERBLA( 'DSYTF2', -INFO )
+         CALL MYSTRAN_XERBLA( 'DSYTF2', -INFO )
          RETURN
       END IF
 *
